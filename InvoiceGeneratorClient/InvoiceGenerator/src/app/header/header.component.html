@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-inverse">
+  <div class="navbar-header">
+    <a href="#" class="navbar-brand">Invoice Generator</a>
+    <button
+      class="navbar-toggle navbar-toggle-right"
+      type="button"
+      (click)="toggleNavbar()"
+    >
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <div class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }">
+    <ul class="nav navbar-nav mr-auto mt-2 mt-lg-0">
+      <li routerLinkActive="active">
+        <a routerLink="/timesheets">Timesheets</a>
+      </li>
+      <li routerLinkActive="active">
+        <a routerLink="/invoices">Invoices</a>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown" appDropdown>
+        <a style="cursor: pointer" class="dropdown-toggle" role="button">
+          Hello, USER or Login<span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a style="cursor: pointer">Settings</a></li>
+          <li><a style="cursor: pointer">Logout</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
