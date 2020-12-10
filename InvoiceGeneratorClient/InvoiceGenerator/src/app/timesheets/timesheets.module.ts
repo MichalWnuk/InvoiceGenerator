@@ -7,10 +7,17 @@ import { SharedModule } from '../shared/shared.module';
 
 
 @NgModule({
-  declarations: [TimesheetsComponent, TimesheetListComponent],
+  declarations: [
+    TimesheetsComponent,
+    TimesheetListComponent
+  ],
   imports: [
     SharedModule,
     TimesheetsRoutingModule
+  ],
+  exports: [
+    TimesheetsComponent,
+    TimesheetListComponent
   ]
 })
 export class TimesheetsModule { }
