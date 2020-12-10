@@ -1,0 +1,15 @@
+.navbar-inverse li a {
+  color: #e7b853;
+}
+
+.navbar-brand {
+  color: #e7b853;
+}
+
+.navbar-inverse .navbar-toggle .icon-bar {
+  background-color: #e7b853;
+}
+
+.dropdown-menu {
+  background-color: #333333;
+}
