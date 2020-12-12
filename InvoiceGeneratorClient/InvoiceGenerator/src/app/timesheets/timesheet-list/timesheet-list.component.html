@@ -1,1 +1,21 @@
-<p>timesheet-list works!</p>
+<div class="btn-toolbar">
+    <button class="btn btn-new" (click)="onNewTimesheet()">New Timesheet</button>
+</div>
+<hr>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th scope="col" *ngFor="let header of headers">{{ header }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let timesheet of timesheets" [routerLink]="[timesheet.id]">
+            <td>{{ timesheet.year }}</td>
+            <td>{{ timesheet.month }}</td>
+            <td>{{ getTotalHours(timesheet) }}</td>
+            <td>{{ timesheet.state }}</td>
+            <td>{{ timesheet.invoiceNumber }}</td>
+        </tr>
+    </tbody>
+</table>
+<router-outlet></router-outlet>
