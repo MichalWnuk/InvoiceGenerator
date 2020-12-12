@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Input, OnInit } from '@angular/core';
 import { Timesheet } from '../timesheet.model';
 
 @Component({
@@ -10,8 +9,9 @@ import { Timesheet } from '../timesheet.model';
 export class TimesheetListComponent implements OnInit {
   timesheets: Timesheet[];
   headers: string[];
+  @Input() isAdding: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.headers = [
@@ -80,7 +80,10 @@ export class TimesheetListComponent implements OnInit {
   }
 
   onNewTimesheet() {
-    this.router.navigate(['./new'], { relativeTo: this.route })
+    this.isAdding = true;
   }
 
+  onFinishedAdding() {
+    this.isAdding = false;
+  }
 }

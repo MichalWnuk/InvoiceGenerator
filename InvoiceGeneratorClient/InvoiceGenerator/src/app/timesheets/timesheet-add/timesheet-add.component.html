@@ -1,5 +1,18 @@
-<div class="btn-toolbar">
-    <button class="btn btn-new" (click)="onSave()">Save</button>
-    <button class="btn btn-new" (click)="onCancel()">Cancel</button>
+<div class="backdrop"></div>
+<div class="message-box">
+    <form #timesheetForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="btn-toolbar">
+            <button type="submit" class="btn btn-new" [disabled]="!timesheetForm.valid">Save</button>
+            <button type="button" class="btn btn-new" (click)="onCancel()">Cancel</button>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label>Create Timesheet for: </label>
+                    <input type="month" id="month" class="form-control" ngModel name="month" required>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
-<hr>

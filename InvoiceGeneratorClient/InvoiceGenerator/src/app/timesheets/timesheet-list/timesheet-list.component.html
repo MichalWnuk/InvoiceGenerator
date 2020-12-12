@@ -1,5 +1,7 @@
 <div class="btn-toolbar">
-    <button class="btn btn-new" (click)="onNewTimesheet()">New Timesheet</button>
+    <button type="button" class="btn btn-new" (click)="onNewTimesheet()">New Timesheet</button>
+    <app-timesheet-add *ngIf="isAdding" (closeEvent)="onFinishedAdding()">
+    </app-timesheet-add>
 </div>
 <hr>
 <table class="table table-bordered table-hover">
@@ -18,4 +20,3 @@
         </tr>
     </tbody>
 </table>
-<router-outlet></router-outlet>

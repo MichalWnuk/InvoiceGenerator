@@ -5,6 +5,7 @@ import { TimesheetsRoutingModule } from './timesheets-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { TimesheetEditComponent } from './timesheet-edit/timesheet-edit.component';
 import { TimesheetAddComponent } from './timesheet-add/timesheet-add.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -17,7 +18,8 @@ import { TimesheetAddComponent } from './timesheet-add/timesheet-add.component';
   ],
   imports: [
     SharedModule,
-    TimesheetsRoutingModule
+    TimesheetsRoutingModule,
+    FormsModule
   ],
   exports: [
     TimesheetsComponent,
