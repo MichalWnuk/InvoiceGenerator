@@ -2,17 +2,17 @@
 .btn-new {
   background-color: #333333;
   border-color: #333333;
-  color: #e7b853;
+  color: #e1a626;
 }
 
 .btn-new:hover {
-  background-color: #e7b853;
-  border-color: #e7b853;
+  background-color: #e1a626;
+  border-color: #e1a626;
   color: #333333;
 }
 
 .btn-new:focus {
   background-color: #333333;
   border-color: #333333;
-  color: #e7b853;
+  color: #e1a626;
 }
