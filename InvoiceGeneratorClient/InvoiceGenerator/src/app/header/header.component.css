@@ -13,3 +13,7 @@
 .dropdown-menu {
   background-color: #333333;
 }
+
+.dropdown-menu li a:hover {
+  background-color: #080808;
+}

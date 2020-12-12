@@ -3,13 +3,17 @@ import { TimesheetsComponent } from './timesheets.component';
 import { TimesheetListComponent } from './timesheet-list/timesheet-list.component';
 import { TimesheetsRoutingModule } from './timesheets-routing.module';
 import { SharedModule } from '../shared/shared.module';
+import { TimesheetEditComponent } from './timesheet-edit/timesheet-edit.component';
+import { TimesheetAddComponent } from './timesheet-add/timesheet-add.component';
 
 
 
 @NgModule({
   declarations: [
     TimesheetsComponent,
-    TimesheetListComponent
+    TimesheetListComponent,
+    TimesheetEditComponent,
+    TimesheetAddComponent
   ],
   imports: [
     SharedModule,
