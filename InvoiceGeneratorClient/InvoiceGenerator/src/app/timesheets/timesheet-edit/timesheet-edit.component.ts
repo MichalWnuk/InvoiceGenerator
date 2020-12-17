@@ -40,6 +40,45 @@ export class TimesheetEditComponent implements OnInit {
   }
 
   private initForm() {
+    this.prepareModel();
+
+    let rowsArray: FormControl[] = [];
+
+    for (let row of this.activeTimesheet.rows) {
+      rowsArray.push(this.formBuilder.control(''));
+    }
+
+    this.timesheetForm = this.formBuilder.group({
+      formRows: this.formBuilder.array([
+        rowsArray
+      ])
+    });
+
+    // const formRows = this.timesheetForm.get('formRows') as FormArray;
+
+    // for (let row of this.activeTimesheet.rows) {
+
+    //   formRows.push(this.formBuilder.control({
+
+    //   }))
+    // }
+
+  }
+
+  // initiateForm(rowId: number): FormGroup {
+  //   let settings = {};
+  //   for (let day of this.daysInMonth) {
+  //     settings[`${rowId}_${day.dayNumber}`] = [''];
+  //   }
+
+  //   return this.formBuilder.group(settings);
+  // }
+
+  private navigateOneStepUp() {
+    this.router.navigate(['../'], { relativeTo: this.route })
+  }
+
+  private prepareModel() {
     let timesheetId = -1;
     let timesheetMonth = '';
 
@@ -50,32 +89,6 @@ export class TimesheetEditComponent implements OnInit {
     for (let dayNumber = 1; dayNumber <= numberOfDays; dayNumber++) {
       this.daysInMonth.push({ dayNumber: dayNumber, reportedHours: 0 });
     }
-
-    this.timesheetForm = this.formBuilder.group({
-      formRows: this.formBuilder.array([])
-    });
-
-    const formRows = this.timesheetForm.get('formRows') as FormArray;
-
-    for (let row of this.activeTimesheet.rows) {
-      const settings = {};
-      settings[row.id] = [''];
-      formRows.push(this.formBuilder.group(settings));
-      formRows.push(this.initiateForm(row.id));
-    }
-  }
-
-  initiateForm(rowId: number): FormGroup {
-    let settings = {};
-    for (let day of this.daysInMonth) {
-      settings[`${rowId}_${day.dayNumber}`] = [''];
-    }
-
-    return this.formBuilder.group(settings);
-  }
-
-  private navigateOneStepUp() {
-    this.router.navigate(['../'], { relativeTo: this.route })
   }
 
   private countDaysInMonth(monthOfYear: string) {

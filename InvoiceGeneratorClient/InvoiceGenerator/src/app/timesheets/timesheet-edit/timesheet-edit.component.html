@@ -8,7 +8,7 @@
         <div class="col-xs-12">
             <div class="form-group">
                 <label>Create Timesheet for: </label>
-                <input type="month" id="month" class="form-control" name="month" required>
+                <!-- <input type="month" id="month" class="form-control" name="month" required> -->
             </div>
         </div>
     </div>
@@ -19,11 +19,12 @@
             </tr>
         </thead>
         <tbody>
-            <ng-container formArrayName="formRows" *ngFor="let row of activeTimesheet.rows">
-                <tr [formGroupName]="row.id">
-                    <td *ngFor="let day of daysInMonth; let i = index">
+            <ng-container formArrayName="formRows" *ngFor="let row of activeTimesheet.rows; let i = index">
+                <tr [formGroupName]="i">
+                    <td>aaa</td>
+                    <!-- <td *ngFor="let day of daysInMonth; let i = index">
                         <input type="number" [formControlName]="getFormControlName(row.id, i+1)">
-                    </td>
+                    </td> -->
                 </tr>
             </ng-container>
         </tbody>
