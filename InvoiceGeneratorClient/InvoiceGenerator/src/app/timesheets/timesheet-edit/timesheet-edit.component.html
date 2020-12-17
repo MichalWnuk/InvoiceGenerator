@@ -1,4 +1,31 @@
-<div class="btn-toolbar">
-    <button type="button" class="btn btn-new" (click)="onBackToList()">Back to List</button>
-</div>
-<hr>
+<form [formGroup]="timesheetForm" (ngSubmit)="onSubmit()">
+    <div class="btn-toolbar">
+        <button type="submit" class="btn btn-new" [disabled]="!timesheetForm.valid">Save</button>
+        <button type="button" class="btn btn-new" (click)="onBackToList()">Back to List</button>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="form-group">
+                <label>Create Timesheet for: </label>
+                <input type="month" id="month" class="form-control" name="month" required>
+            </div>
+        </div>
+    </div>
+    <table class="table-bordered table-responsive">
+        <thead>
+            <tr>
+                <th scope="col" *ngFor="let day of daysInMonth">{{ day.dayNumber }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <ng-container formArrayName="formRows" *ngFor="let row of activeTimesheet.rows">
+                <tr [formGroupName]="row.id">
+                    <td *ngFor="let day of daysInMonth; let i = index">
+                        <input type="number" [formControlName]="getFormControlName(row.id, i+1)">
+                    </td>
+                </tr>
+            </ng-container>
+        </tbody>
+    </table>
+</form>
