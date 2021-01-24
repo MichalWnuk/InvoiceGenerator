@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, Input, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Timesheet } from '../timesheet.model';
+import { TimesheetService } from '../timesheet.service';
 
 @Component({
   selector: 'app-timesheet-list',
@@ -10,65 +11,28 @@ import { Timesheet } from '../timesheet.model';
 export class TimesheetListComponent implements OnInit {
   timesheets: Timesheet[];
   headers: string[];
+  @Input() isAdding = false;
+  timesheetsSubscription: Subscription;
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor(private timesheetService: TimesheetService) { }
 
   ngOnInit(): void {
     this.headers = [
-      "Year",
-      "Month",
-      "Total Hours",
-      "State",
-      "Invoice No."
+      'Year',
+      'Month',
+      'Total Hours',
+      'State',
+      'Invoice No.'
     ];
-
-    this.timesheets = [
-      {
-        id: 1, year: 2020, month: 1, state: "Open", invoiceNumber: "001", rows: [
-          {
-            id: 1, rateType: { id: 1, name: "STD", type: "STD" }, days: [
-              { dayNumber: 1, reportedHours: 8 },
-              { dayNumber: 2, reportedHours: 8 },
-              { dayNumber: 3, reportedHours: 8 },
-              { dayNumber: 4, reportedHours: 8 },
-              { dayNumber: 5, reportedHours: 8 },
-            ]
-          }
-        ]
-      },
-      {
-        id: 2, year: 2020, month: 2, state: "Open", invoiceNumber: "001", rows: [
-          {
-            id: 2, rateType: { id: 1, name: "STD", type: "STD" }, days: [
-              { dayNumber: 1, reportedHours: 8 },
-              { dayNumber: 2, reportedHours: 8 },
-              { dayNumber: 3, reportedHours: 8 },
-              { dayNumber: 4, reportedHours: 8 },
-              { dayNumber: 5, reportedHours: 8 },
-            ]
-          }
-        ]
-      },
-      {
-        id: 3, year: 2020, month: 3, state: "Open", invoiceNumber: "001", rows: [
-          {
-            id: 3, rateType: { id: 1, name: "STD", type: "STD" }, days: [
-              { dayNumber: 1, reportedHours: 8 },
-              { dayNumber: 2, reportedHours: 8 },
-              { dayNumber: 3, reportedHours: 8 },
-              { dayNumber: 4, reportedHours: 8 },
-              { dayNumber: 5, reportedHours: 8 },
-            ]
-          }
-        ]
-      }
-    ]
+    this.timesheetsSubscription =
+      this.timesheetService.timesheetsChanged.subscribe((timesheets: Timesheet[]) => { this.timesheets = timesheets; });
+    this.timesheets = this.timesheetService.getTimesheets();
   }
 
   getTotalHours(timesheet: Timesheet): string {
     const rows = timesheet.rows;
 
-    let hoursCount: number = 0;
+    let hoursCount = 0;
 
     rows.forEach(row => {
       row.days.forEach(day => {
@@ -79,8 +43,11 @@ export class TimesheetListComponent implements OnInit {
     return hoursCount.toString();
   }
 
-  onNewTimesheet() {
-    this.router.navigate(['./new'], { relativeTo: this.route })
+  onNewTimesheet(): void {
+    this.isAdding = true;
   }
 
+  onFinishedAdding(): void {
+    this.isAdding = false;
+  }
 }

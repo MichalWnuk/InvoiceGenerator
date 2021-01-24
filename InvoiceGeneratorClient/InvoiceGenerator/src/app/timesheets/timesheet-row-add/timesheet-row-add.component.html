@@ -1,0 +1,20 @@
+<div class="backdrop"></div>
+<div class="message-box">
+    <form #rowForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="btn-toolbar">
+            <button type="submit" class="btn btn-new" [disabled]="!rowForm.valid">Save</button>
+            <button type="button" class="btn btn-new" (click)="onClose()">Cancel</button>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="form-group">
+                    <label for="rateType">Select rate type</label>
+                    <select id="rateType" id="rateType" name="rateType" class="form-control" ngModel required>
+                        <option *ngFor="let type of rateTypes" [value]="type.id">{{ type.name }}</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
