@@ -7,6 +7,8 @@ import { TimesheetEditComponent } from './timesheet-edit/timesheet-edit.componen
 import { TimesheetAddComponent } from './timesheet-add/timesheet-add.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TimesheetService } from './timesheet.service';
+import { TimesheetRowAddComponent } from './timesheet-row-add/timesheet-row-add.component';
+import { RateTypeService } from './ratetype.service';
 
 
 
@@ -15,7 +17,8 @@ import { TimesheetService } from './timesheet.service';
     TimesheetsComponent,
     TimesheetListComponent,
     TimesheetEditComponent,
-    TimesheetAddComponent
+    TimesheetAddComponent,
+    TimesheetRowAddComponent
   ],
   imports: [
     SharedModule,
@@ -27,6 +30,6 @@ import { TimesheetService } from './timesheet.service';
     TimesheetsComponent,
     TimesheetListComponent
   ],
-  providers: [TimesheetService]
+  providers: [TimesheetService, RateTypeService]
 })
 export class TimesheetsModule { }

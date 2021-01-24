@@ -15,13 +15,13 @@ export class TimesheetAddComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onSubmit() {
+  onSubmit(): void {
     console.log(this.timesheetForm.value.month);
     this.timesheetForm.reset();
     this.closeEvent.emit();
   }
 
-  onCancel() {
+  onCancel(): void {
     this.closeEvent.emit();
   }
 }

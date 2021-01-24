@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { Day } from '../day.model';
+import { Row } from '../row.model';
 import { Timesheet } from '../timesheet.model';
 import { TimesheetService } from '../timesheet.service';
 
@@ -11,89 +11,145 @@ import { TimesheetService } from '../timesheet.service';
   styleUrls: ['./timesheet-edit.component.css']
 })
 export class TimesheetEditComponent implements OnInit {
-  id: number = -1;
-  activeTimesheet: Timesheet;
-  daysInMonth: Day[] = [];
-  timesheetForm: FormGroup;
+  currentTimesheet: Timesheet;
+  loadedRow: Row;
+  headers: string[] = [];
+  isRowLoaded = false;
+  rowForm: FormGroup;
+  isAddingRow = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private timesheetService: TimesheetService, private formBuilder: FormBuilder) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private timesheetService: TimesheetService) { }
 
-  ngOnInit(): void {
-    this.route.params.subscribe(
-      (params: Params) => {
-        this.id = +params['id'];
-        this.initForm();
-      }
-    );
+  get controls(): AbstractControl[] {
+    return (this.rowForm.get('days') as FormArray).controls;
   }
 
-  onBackToList() {
+  get currentMonthString(): string {
+    return new Date(this.currentTimesheet.year, this.currentTimesheet.month).toISOString().slice(0, 7);
+  }
+
+  get minDateForCurrentTimesheet(): string {
+    return new Date(this.currentTimesheet.year, this.currentTimesheet.month - 1, 2).toISOString().slice(0, 10);
+  }
+
+  get maxDateForCurrentTimesheet(): string {
+    return new Date(this.currentTimesheet.year, this.currentTimesheet.month).toISOString().slice(0, 10);
+  }
+
+  ngOnInit(): void {
+    this.headers = [
+      'Row Type',
+      'Reported Hours'
+    ];
+
+    this.route.params.subscribe(
+      (params: Params) => {
+        this.currentTimesheet = this.timesheetService.getTimesheet(+params.id);
+      }
+    );
+
+    this.route.queryParams.subscribe(
+      (queryParams: Params) => {
+        this.isRowLoaded = queryParams.Row != null;
+        if (this.isRowLoaded) {
+          this.loadedRow = this.currentTimesheet.rows.find(row => row.id === +queryParams.Row);
+          this.initRowForm();
+        }
+      }
+    );
+
+
+  }
+
+  onBackToList(): void {
     this.navigateOneStepUp();
   }
 
-  onSubmit() {
+  onSubmit(): void {
 
   }
 
-  getFormControlName(rowId: number, day: number) {
-    return `${rowId}_${day}`;
+  onAddRow(): void {
+    this.isAddingRow = true;
   }
 
-  private initForm() {
-    this.prepareModel();
+  onFinishedAddingRow(): void {
+    this.isAddingRow = false;
+  }
 
-    let rowsArray: FormControl[] = [];
+  onAddDay(): void {
+    (this.rowForm.get('days') as FormArray).push(
+      new FormGroup({
+        dayNumber: new FormControl(
+          null, [
+          Validators.required,
+          this.minDate(new Date(this.minDateForCurrentTimesheet)),
+          this.maxDate(new Date(this.maxDateForCurrentTimesheet))]),
+        reportedHours: new FormControl(null, [Validators.required, Validators.min(0), Validators.max(24)])
+      })
+    );
+  }
 
-    for (let row of this.activeTimesheet.rows) {
-      rowsArray.push(this.formBuilder.control(''));
+  onRowSave(): void {
+
+  }
+
+  // tslint:disable-next-line: typedef
+  minDate(date: Date) {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      if (control.value !== null && (new Date(control.value) < date)) {
+        return { minDate: true };
+      }
+
+      return null;
+    };
+  }
+
+  // tslint:disable-next-line: typedef
+  maxDate(date: Date) {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      if (control.value !== null && (new Date(control.value) > date)) {
+        return { maxDate: true };
+      }
+
+      return null;
+    };
+  }
+
+  private navigateOneStepUp(): void {
+    if (this.isRowLoaded) {
+      this.router.navigate(['.'], { relativeTo: this.route });
+    } else {
+      this.router.navigate(['../'], { relativeTo: this.route });
+    }
+  }
+
+  private initRowForm(): void {
+    const rowDays = new FormArray([]);
+
+    if (this.loadedRow.days) {
+      for (const day of this.loadedRow.days) {
+        rowDays.push(
+          new FormGroup({
+            dayNumber: new FormControl(this.convertDayNumberToDate(day.dayNumber), [
+              Validators.required,
+              this.minDate(new Date(this.minDateForCurrentTimesheet)),
+              this.maxDate(new Date(this.maxDateForCurrentTimesheet))]),
+            reportedHours: new FormControl(day.reportedHours, [Validators.required, Validators.min(0), Validators.max(24)])
+          })
+        );
+      }
     }
 
-    this.timesheetForm = this.formBuilder.group({
-      formRows: this.formBuilder.array([
-        rowsArray
-      ])
+    this.rowForm = new FormGroup({
+      days: rowDays
     });
-
-    // const formRows = this.timesheetForm.get('formRows') as FormArray;
-
-    // for (let row of this.activeTimesheet.rows) {
-
-    //   formRows.push(this.formBuilder.control({
-
-    //   }))
-    // }
-
   }
 
-  // initiateForm(rowId: number): FormGroup {
-  //   let settings = {};
-  //   for (let day of this.daysInMonth) {
-  //     settings[`${rowId}_${day.dayNumber}`] = [''];
-  //   }
-
-  //   return this.formBuilder.group(settings);
-  // }
-
-  private navigateOneStepUp() {
-    this.router.navigate(['../'], { relativeTo: this.route })
-  }
-
-  private prepareModel() {
-    let timesheetId = -1;
-    let timesheetMonth = '';
-
-    this.activeTimesheet = this.timesheetService.getTimesheet(this.id);
-    timesheetId = this.activeTimesheet.id;
-    timesheetMonth = `${this.activeTimesheet.month}-${this.activeTimesheet.year}`;
-    const numberOfDays = this.countDaysInMonth(timesheetMonth);
-    for (let dayNumber = 1; dayNumber <= numberOfDays; dayNumber++) {
-      this.daysInMonth.push({ dayNumber: dayNumber, reportedHours: 0 });
-    }
-  }
-
-  private countDaysInMonth(monthOfYear: string) {
-    const month = parseInt(monthOfYear.split("-")[0]);
-    const year = parseInt(monthOfYear.split("-")[1]);
-    return new Date(year, month, 0).getDate();
+  private convertDayNumberToDate(dayNumber: number): string {
+    return new Date(this.currentTimesheet.year, this.currentTimesheet.month - 1, dayNumber + 1).toISOString().slice(0, 10);
   }
 }

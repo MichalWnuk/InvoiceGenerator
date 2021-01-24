@@ -4,9 +4,9 @@ import { IndexComponent } from './index/index.component';
 
 const appRoutes: Routes = [
     { path: '', component: IndexComponent },
-    { path: 'timesheets', loadChildren: () => import('./timesheets/timesheets.module').then(m => m.TimesheetsModule) },
-    { path: 'invoices', loadChildren: () => import('./invoices/invoices.module').then(m => m.InvoicesModule) }
-]
+    { path: 'Timesheets', loadChildren: () => import('./timesheets/timesheets.module').then(m => m.TimesheetsModule) },
+    { path: 'Invoices', loadChildren: () => import('./invoices/invoices.module').then(m => m.InvoicesModule) }
+];
 
 @NgModule({
     imports: [RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules })],
