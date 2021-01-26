@@ -11,7 +11,7 @@ import { TimesheetService } from '../timesheet.service';
 export class TimesheetListComponent implements OnInit {
   timesheets: Timesheet[];
   headers: string[];
-  @Input() isAdding = false;
+  isAdding = false;
   timesheetsSubscription: Subscription;
 
   constructor(private timesheetService: TimesheetService) { }
@@ -29,8 +29,20 @@ export class TimesheetListComponent implements OnInit {
     this.timesheets = this.timesheetService.getTimesheets();
   }
 
+  getTimesheetMonthNumber(date: Date): number {
+    return date.getMonth() + 1;
+  }
+
+  getTimesheetYear(date: Date): number {
+    return date.getUTCFullYear();
+  }
+
   getTotalHours(timesheet: Timesheet): string {
     const rows = timesheet.rows;
+
+    if (!rows) {
+      return '0';
+    }
 
     let hoursCount = 0;
 

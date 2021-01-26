@@ -1,4 +1,4 @@
 export class Day {
-    public dayNumber: number;
+    public date: Date;
     public reportedHours: number;
 }

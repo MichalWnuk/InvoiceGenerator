@@ -1,40 +1,53 @@
-<app-timesheet-row-add *ngIf="isAddingRow" (closePopup)="onFinishedAddingRow()"></app-timesheet-row-add>
+<app-timesheet-row-add *ngIf="isAddingRow" (closePopup)="onFinishedAddingRow()" [currentTimesheet]="currentTimesheet">
+</app-timesheet-row-add>
 <div class="btn-toolbar">
     <button type="button" class="btn btn-new" (click)="onBackToList()">Back to List</button>
     <button type="button" class="btn btn-new" (click)="onAddRow()" *ngIf="!isRowLoaded">Add Row</button>
-    <button type="button" class="btn btn-new" (click)="onRowSave()" *ngIf="isRowLoaded"
-        [disabled]="!rowForm.valid">Save</button>
-    <button type="button" class="btn btn-new" (click)="onAddDay()" *ngIf="isRowLoaded">Add Day</button>
+
 </div>
 <hr>
 <form [formGroup]="rowForm" (ngSubmit)="onSubmit()" *ngIf="isRowLoaded">
+    <div class="btn-toolbar">
+        <button type="submit" class="btn btn-new" *ngIf="isRowLoaded" [disabled]="!rowForm.valid">Save</button>
+        <button type="button" class="btn btn-new" (click)="onAddDay()" *ngIf="isRowLoaded">Add Day</button>
+    </div>
     <div>
-        <p>
-            {{ this.loadedRow.rateType.name }} Timesheet for {{ this.currentMonthString }}
-        </p>
+        <h3>
+            {{ this.loadedRow.rateType?.name }} Timesheet for {{ this.currentMonthString }}
+        </h3>
     </div>
     <div class="form-group" formArrayName="days">
         <div class="row" *ngFor="let dayControl of controls; let i = index" [formGroupName]="i">
             <div class="col-xs-2">
-                <input type="date" class="form-control" formControlName="dayNumber"
-                    [min]="this.minDateForCurrentTimesheet" [max]="this.maxDateForCurrentTimesheet">
+                <input type="date" class="form-control" formControlName="day" [min]="this.minDateForCurrentTimesheet"
+                    [max]="this.maxDateForCurrentTimesheet">
             </div>
             <div class="col-xs-1">
                 <input type="number" class="form-control" formControlName="reportedHours" min="0" max="24">
             </div>
+            <div class="col-xs-1">
+                <button type="button" class="btn btn-remove" (click)="onRemoveDay(i)">X</button>
+            </div>
         </div>
     </div>
 </form>
-<table class="table table-bordered table-hover" *ngIf="!isRowLoaded">
-    <thead>
-        <tr>
-            <th scope="col" *ngFor="let header of headers">{{ header }}</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr *ngFor="let row of currentTimesheet.rows" [routerLink]="[]" [queryParams]="{Row: row.id}">
-            <td>{{ row.rateType.name }}</td>
-            <td>{{ row.days.length }} (days)</td>
-        </tr>
-    </tbody>
-</table>
+<div *ngIf="!isRowLoaded">
+    <div>
+        <p>
+            Timesheet for {{ this.currentMonthString }}
+        </p>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th scope="col" *ngFor="let header of headers">{{ header }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of currentTimesheet.rows" [routerLink]="[]" [queryParams]="{Row: row.id}">
+                <td>{{ row.rateType?.name }}</td>
+                <td>{{ getReportedHoursString(row) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

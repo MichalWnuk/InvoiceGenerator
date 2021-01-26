@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Day } from '../day.model';
 import { Row } from '../row.model';
 import { Timesheet } from '../timesheet.model';
 import { TimesheetService } from '../timesheet.service';
@@ -28,15 +29,29 @@ export class TimesheetEditComponent implements OnInit {
   }
 
   get currentMonthString(): string {
-    return new Date(this.currentTimesheet.year, this.currentTimesheet.month).toISOString().slice(0, 7);
+    return this.currentTimesheet.date.toISOString().slice(0, 7);
   }
 
   get minDateForCurrentTimesheet(): string {
-    return new Date(this.currentTimesheet.year, this.currentTimesheet.month - 1, 2).toISOString().slice(0, 10);
+    return this.currentTimesheet.date.toISOString().slice(0, 10);
   }
 
   get maxDateForCurrentTimesheet(): string {
-    return new Date(this.currentTimesheet.year, this.currentTimesheet.month).toISOString().slice(0, 10);
+    const nextMonth = this.currentTimesheet.date.getMonth() + 1;
+    const currentTimesheetYear = this.currentTimesheet.date.getUTCFullYear();
+    return new Date(currentTimesheetYear, nextMonth).toISOString().slice(0, 10);
+  }
+
+  getReportedHoursString(row: Row): string {
+    let hoursCount = 0;
+
+    if (row.days && row.days.length > 0) {
+      row.days?.forEach(day => {
+        hoursCount += day.reportedHours;
+      });
+    }
+
+    return `${hoursCount}`;
   }
 
   ngOnInit(): void {
@@ -60,8 +75,6 @@ export class TimesheetEditComponent implements OnInit {
         }
       }
     );
-
-
   }
 
   onBackToList(): void {
@@ -69,7 +82,16 @@ export class TimesheetEditComponent implements OnInit {
   }
 
   onSubmit(): void {
-
+    const newDaysArray: Day[] = [];
+    this.rowForm.value.days.forEach(dayElem => {
+      const dayObj = new Day();
+      dayObj.date = new Date(dayElem.day);
+      dayObj.reportedHours = dayElem.reportedHours;
+      newDaysArray.push(dayObj);
+    });
+    this.loadedRow.days = newDaysArray;
+    this.timesheetService.updateTimesheet(this.currentTimesheet);
+    console.log(this.rowForm.value);
   }
 
   onAddRow(): void {
@@ -81,24 +103,23 @@ export class TimesheetEditComponent implements OnInit {
   }
 
   onAddDay(): void {
-    (this.rowForm.get('days') as FormArray).push(
+    (this.rowForm.controls.days as FormArray).push(
       new FormGroup({
-        dayNumber: new FormControl(
+        day: new FormControl(
           null, [
           Validators.required,
           this.minDate(new Date(this.minDateForCurrentTimesheet)),
           this.maxDate(new Date(this.maxDateForCurrentTimesheet))]),
         reportedHours: new FormControl(null, [Validators.required, Validators.min(0), Validators.max(24)])
-      })
+      }, this.hasControlAdded())
     );
   }
 
-  onRowSave(): void {
-
+  onRemoveDay(dayControlIndex: number): void {
+    (this.rowForm.controls.days as FormArray).removeAt(dayControlIndex);
   }
 
-  // tslint:disable-next-line: typedef
-  minDate(date: Date) {
+  minDate(date: Date): ValidatorFn {
     return (control: AbstractControl): { [key: string]: boolean } | null => {
       if (control.value !== null && (new Date(control.value) < date)) {
         return { minDate: true };
@@ -108,14 +129,22 @@ export class TimesheetEditComponent implements OnInit {
     };
   }
 
-  // tslint:disable-next-line: typedef
-  maxDate(date: Date) {
+  maxDate(date: Date): ValidatorFn {
     return (control: AbstractControl): { [key: string]: boolean } | null => {
       if (control.value !== null && (new Date(control.value) > date)) {
         return { maxDate: true };
       }
 
       return null;
+    };
+  }
+
+  hasControlAdded(): ValidatorFn {
+    return (group: FormGroup): { [key: string]: boolean } => {
+      if (group.controls && (group.controls.day?.value?.length > 0 || group.controls.days?.value?.length)) {
+        return null;
+      }
+      return { hasControlAdded: true };
     };
   }
 
@@ -131,14 +160,14 @@ export class TimesheetEditComponent implements OnInit {
     const rowDays = new FormArray([]);
 
     if (this.loadedRow.days) {
-      for (const day of this.loadedRow.days) {
+      for (const loadedDay of this.loadedRow.days) {
         rowDays.push(
           new FormGroup({
-            dayNumber: new FormControl(this.convertDayNumberToDate(day.dayNumber), [
+            day: new FormControl(this.convertDateToInput(loadedDay.date), [
               Validators.required,
               this.minDate(new Date(this.minDateForCurrentTimesheet)),
               this.maxDate(new Date(this.maxDateForCurrentTimesheet))]),
-            reportedHours: new FormControl(day.reportedHours, [Validators.required, Validators.min(0), Validators.max(24)])
+            reportedHours: new FormControl(loadedDay.reportedHours, [Validators.required, Validators.min(0), Validators.max(24)])
           })
         );
       }
@@ -146,10 +175,10 @@ export class TimesheetEditComponent implements OnInit {
 
     this.rowForm = new FormGroup({
       days: rowDays
-    });
+    }, this.hasControlAdded());
   }
 
-  private convertDayNumberToDate(dayNumber: number): string {
-    return new Date(this.currentTimesheet.year, this.currentTimesheet.month - 1, dayNumber + 1).toISOString().slice(0, 10);
+  private convertDateToInput(date: Date): string {
+    return date.toISOString().slice(0, 10);
   }
 }

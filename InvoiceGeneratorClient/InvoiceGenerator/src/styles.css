@@ -16,3 +16,21 @@
   border-color: #333333;
   color: #e1a626;
 }
+
+.btn-remove {
+  background-color: #e1a626;
+  border-color: #e1a626;
+  color: #333333;
+}
+
+.btn-remove:hover {
+  background-color: #333333;
+  border-color: #333333;
+  color: #e1a626;
+}
+
+.btn-remove:focus {
+  background-color: #e1a626;
+  border-color: #e1a626;
+  color: #333333;
+}
