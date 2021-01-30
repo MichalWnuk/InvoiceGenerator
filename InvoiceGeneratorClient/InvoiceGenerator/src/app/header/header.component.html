@@ -8,7 +8,7 @@
     </button>
   </div>
 
-  <div class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }">
+  <div *ngIf="isAuthenticated" class="collapse navbar-collapse" [ngClass]="{ 'show': navbarOpen }">
     <ul class="nav navbar-nav mr-auto mt-2 mt-lg-0">
       <li routerLinkActive="active">
         <a routerLink="/Timesheets">Timesheets</a>
@@ -20,12 +20,21 @@
     <ul class="nav navbar-nav navbar-right">
       <li class="dropdown" appDropdown>
         <a style="cursor: pointer" class="dropdown-toggle" role="button">
-          Hello, USER or Login<span class="caret"></span>
+          Hello, {{ userName }}<span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
           <li><a style="cursor: pointer">Settings</a></li>
-          <li><a style="cursor: pointer">Logout</a></li>
+          <li><a style="cursor: pointer" (click)="onLogout()">Logout</a></li>
         </ul>
+      </li>
+    </ul>
+  </div>
+  <div *ngIf="!isAuthenticated" class="collapse navbar-collapse">
+    <ul class="nav navbar-nav navbar-right">
+      <li>
+        <a style="cursor: pointer" routerLink="/Auth">
+          Login
+        </a>
       </li>
     </ul>
   </div>
