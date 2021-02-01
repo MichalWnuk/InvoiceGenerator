@@ -54,6 +54,7 @@ namespace InvoiceGeneratorAPI
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"]))
                     };
                 });
+            services.AddResponseCaching();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Invoice Generator API", Version = "v1" });
@@ -87,6 +88,8 @@ namespace InvoiceGeneratorAPI
             {
                 endpoints.MapControllers();
             });
+
+            app.UseResponseCaching();
         }
     }
 }

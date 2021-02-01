@@ -1,34 +1,40 @@
-import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Row } from '../row.model';
+import { Subscription } from 'rxjs';
+import { DataStorageService } from 'src/app/shared/data-storage.service';
 import { Timesheet } from '../timesheet.model';
-import { TimesheetService } from '../timesheet.service';
 
 @Component({
   selector: 'app-timesheet-add',
   templateUrl: './timesheet-add.component.html',
   styleUrls: ['./timesheet-add.component.css']
 })
-export class TimesheetAddComponent implements OnInit {
+export class TimesheetAddComponent implements OnInit, OnDestroy {
   @Output() closeEvent = new EventEmitter();
   @ViewChild('timesheetForm', { static: false }) timesheetForm: NgForm;
+  timesheetSub: Subscription;
 
-  constructor(private timesheetService: TimesheetService) { }
+  constructor(private dataStorageService: DataStorageService) { }
 
   ngOnInit(): void {
   }
 
+  ngOnDestroy(): void {
+    this.timesheetSub.unsubscribe();
+  }
+
   onSubmit(): void {
-    console.log(this.timesheetForm.value.month);
     const timesheet: Timesheet = new Timesheet();
     const timesheetDate: Date = new Date(this.timesheetForm.value.month);
+    timesheetDate.setDate(2);
     timesheet.date = timesheetDate;
     timesheet.state = 'Open';
     timesheet.rows = [];
-    timesheet.id = Math.floor(Math.random() * 1000); // to be replaced by real ID from DB
-    this.timesheetService.addTimesheet(timesheet);
-    this.timesheetForm.reset();
-    this.closeEvent.emit();
+    timesheet.userId = '00000000-0000-0000-0000-000000000000';
+    this.timesheetSub = this.dataStorageService.createTimesheet(timesheet).subscribe(data => {
+      this.timesheetForm.reset();
+      this.closeEvent.emit();
+    });
   }
 
   onCancel(): void {

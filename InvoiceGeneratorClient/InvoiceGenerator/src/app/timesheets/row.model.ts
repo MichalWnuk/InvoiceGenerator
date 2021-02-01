@@ -4,5 +4,6 @@ import { RateType } from './rateType.model';
 export class Row {
     public id: number;
     public days: Day[];
-    public rateType: RateType;
+    public rateTypeId: number;
+    public timesheetId: number;
 }

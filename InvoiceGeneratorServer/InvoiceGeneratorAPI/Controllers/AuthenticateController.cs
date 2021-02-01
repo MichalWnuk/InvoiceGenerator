@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using InvoiceGeneratorAPI.Models;
-using InvoiceGeneratorAPI.Services;
+using InvoiceGeneratorAPI.Const;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -31,6 +31,8 @@ namespace InvoiceGeneratorAPI.Controllers
         }
 
         // POST: api/Login
+        [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Client)]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
@@ -53,7 +55,7 @@ namespace InvoiceGeneratorAPI.Controllers
             var token = new JwtSecurityToken(
                 _configuration["JWT:ValidIssuer"],
                 _configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddMinutes(10),
+                expires: DateTime.Now.AddMinutes(60),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
@@ -69,6 +71,7 @@ namespace InvoiceGeneratorAPI.Controllers
 
         //POST: api/Register
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
@@ -94,12 +97,12 @@ namespace InvoiceGeneratorAPI.Controllers
                         { Status = "Error", Message = "User creation failed! Please check user details and try again." });
             }
 
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            if (!await _roleManager.RoleExistsAsync(Roles.User))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                await _roleManager.CreateAsync(new IdentityRole(Roles.User));
             }
 
-            await _userManager.AddToRoleAsync(user, UserRoles.User);
+            await _userManager.AddToRoleAsync(user, Roles.User);
 
             var loginModel = new LoginModel()
             {
@@ -112,6 +115,7 @@ namespace InvoiceGeneratorAPI.Controllers
 
         //POST: api/RegisterAdmin
         [ApiExplorerSettings(IgnoreApi = true)]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
         {
@@ -138,17 +142,17 @@ namespace InvoiceGeneratorAPI.Controllers
                         { Status = "Error", Message = "User creation failed. Please check user details and try again" });
             }
 
-            if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
+            if (!await _roleManager.RoleExistsAsync(Roles.Admin))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                await _roleManager.CreateAsync(new IdentityRole(Roles.Admin));
             }
 
-            if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+            if (!await _roleManager.RoleExistsAsync(Roles.User))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                await _roleManager.CreateAsync(new IdentityRole(Roles.User));
             }
 
-            await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+            await _userManager.AddToRoleAsync(user, Roles.Admin);
 
             var loginModel = new LoginModel()
             {

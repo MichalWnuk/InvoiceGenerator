@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Timesheet } from '../timesheet.model';
 import { TimesheetService } from '../timesheet.service';
@@ -8,7 +8,7 @@ import { TimesheetService } from '../timesheet.service';
   templateUrl: './timesheet-list.component.html',
   styleUrls: ['./timesheet-list.component.css']
 })
-export class TimesheetListComponent implements OnInit {
+export class TimesheetListComponent implements OnInit, OnDestroy {
   timesheets: Timesheet[];
   headers: string[];
   isAdding = false;
@@ -21,12 +21,15 @@ export class TimesheetListComponent implements OnInit {
       'Year',
       'Month',
       'Total Hours',
-      'State',
-      'Invoice No.'
+      'State'
     ];
     this.timesheetsSubscription =
       this.timesheetService.timesheetsChanged.subscribe((timesheets: Timesheet[]) => { this.timesheets = timesheets; });
     this.timesheets = this.timesheetService.getTimesheets();
+  }
+
+  ngOnDestroy(): void {
+    this.timesheetsSubscription.unsubscribe();
   }
 
   getTimesheetMonthNumber(date: Date): number {

@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { DataStorageService } from 'src/app/shared/data-storage.service';
 import { Day } from '../day.model';
+import { RateTypeService } from '../ratetype.service';
 import { Row } from '../row.model';
 import { Timesheet } from '../timesheet.model';
 import { TimesheetService } from '../timesheet.service';
@@ -11,18 +14,22 @@ import { TimesheetService } from '../timesheet.service';
   templateUrl: './timesheet-edit.component.html',
   styleUrls: ['./timesheet-edit.component.css']
 })
-export class TimesheetEditComponent implements OnInit {
+export class TimesheetEditComponent implements OnInit, OnDestroy {
   currentTimesheet: Timesheet;
   loadedRow: Row;
   headers: string[] = [];
   isRowLoaded = false;
   rowForm: FormGroup;
   isAddingRow = false;
+  updateTimesheetSub: Subscription;
+  finishedSaving = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private timesheetService: TimesheetService) { }
+    private timesheetService: TimesheetService,
+    private rateTypeService: RateTypeService,
+    private dataStorageService: DataStorageService) { }
 
   get controls(): AbstractControl[] {
     return (this.rowForm.get('days') as FormArray).controls;
@@ -42,16 +49,8 @@ export class TimesheetEditComponent implements OnInit {
     return new Date(currentTimesheetYear, nextMonth).toISOString().slice(0, 10);
   }
 
-  getReportedHoursString(row: Row): string {
-    let hoursCount = 0;
-
-    if (row.days && row.days.length > 0) {
-      row.days?.forEach(day => {
-        hoursCount += day.reportedHours;
-      });
-    }
-
-    return `${hoursCount}`;
+  get dayAddedMessage(): string {
+    return 'Timesheet saved.';
   }
 
   ngOnInit(): void {
@@ -77,6 +76,28 @@ export class TimesheetEditComponent implements OnInit {
     );
   }
 
+  ngOnDestroy(): void {
+    if (this.updateTimesheetSub) {
+      this.updateTimesheetSub.unsubscribe();
+    }
+  }
+
+  getReportedHoursString(row: Row): string {
+    let hoursCount = 0;
+
+    if (row.days && row.days.length > 0) {
+      row.days?.forEach(day => {
+        hoursCount += day.reportedHours;
+      });
+    }
+
+    return `${hoursCount}`;
+  }
+
+  getRateTypeNameString(id: number): string {
+    return this.rateTypeService.getRateTypeDisplayName(id);
+  }
+
   onBackToList(): void {
     this.navigateOneStepUp();
   }
@@ -90,6 +111,9 @@ export class TimesheetEditComponent implements OnInit {
       newDaysArray.push(dayObj);
     });
     this.loadedRow.days = newDaysArray;
+    this.updateTimesheetSub = this.dataStorageService.updateTimesheet(this.currentTimesheet).subscribe(data => {
+      this.finishedSaving = true;
+    });
     this.timesheetService.updateTimesheet(this.currentTimesheet);
     console.log(this.rowForm.value);
   }
@@ -99,6 +123,7 @@ export class TimesheetEditComponent implements OnInit {
   }
 
   onFinishedAddingRow(): void {
+    this.currentTimesheet = this.timesheetService.getTimesheet(this.currentTimesheet.id);
     this.isAddingRow = false;
   }
 
@@ -146,6 +171,10 @@ export class TimesheetEditComponent implements OnInit {
       }
       return { hasControlAdded: true };
     };
+  }
+
+  onFinishedSaving(): void {
+    this.finishedSaving = false;
   }
 
   private navigateOneStepUp(): void {

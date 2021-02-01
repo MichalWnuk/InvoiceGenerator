@@ -1,24 +1,39 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Subscription } from 'rxjs';
+import { DataStorageService } from 'src/app/shared/data-storage.service';
 import { RateType } from '../rateType.model';
 import { RateTypeService } from '../ratetype.service';
 import { Row } from '../row.model';
 import { Timesheet } from '../timesheet.model';
-import { TimesheetService } from '../timesheet.service';
+import * as clone from 'clone';
 
 @Component({
   selector: 'app-timesheet-row-add',
   templateUrl: './timesheet-row-add.component.html',
   styleUrls: ['./timesheet-row-add.component.css']
 })
-export class TimesheetRowAddComponent implements OnInit {
+export class TimesheetRowAddComponent implements OnInit, OnDestroy {
   @Output() closePopup = new EventEmitter<void>();
   @ViewChild('rowForm', { static: false }) rowForm: NgForm;
   @Input() currentTimesheet: Timesheet;
   row: Row;
   rateTypes: RateType[] = [];
+  updateTimesheetSub: Subscription;
+  refreshTimesheetsSub: Subscription;
 
-  constructor(private timesheetService: TimesheetService, private rateTypeService: RateTypeService) { }
+  constructor(
+    private rateTypeService: RateTypeService,
+    private dataStorageService: DataStorageService) { }
+
+  ngOnInit(): void {
+    this.rateTypes = this.rateTypeService.getRateTypes();
+  }
+
+  ngOnDestroy(): void {
+    this.updateTimesheetSub.unsubscribe();
+    this.refreshTimesheetsSub.unsubscribe();
+  }
 
   onClose(): void {
     this.closePopup.emit();
@@ -26,18 +41,16 @@ export class TimesheetRowAddComponent implements OnInit {
 
   onSubmit(): void {
     const row: Row = new Row();
-    row.rateType = this.rateTypes.find(rateType => rateType.id === +this.rowForm.value.rateType);
+    row.rateTypeId = this.rateTypes.find(rateType => rateType.id === +this.rowForm.value.rateType).id;
     row.days = [];
-    row.id = Math.floor(Math.random() * 1000); // To be replaced by real ID from DB
-    this.currentTimesheet.rows.push(row);
-    this.timesheetService.updateTimesheet(this.currentTimesheet);
-    console.log(this.rowForm.value);
-    this.rowForm.reset();
-    this.onClose();
+    row.timesheetId = this.currentTimesheet.id;
+    const modifiedTimesheet = clone(this.currentTimesheet);
+    modifiedTimesheet.rows.push(row);
+    this.updateTimesheetSub = this.dataStorageService.updateTimesheet(modifiedTimesheet).subscribe(data => {
+      this.refreshTimesheetsSub = this.dataStorageService.fetchUserTimesheets().subscribe(() => {
+        this.rowForm.reset();
+        this.onClose();
+      });
+    });
   }
-
-  ngOnInit(): void {
-    this.rateTypes = this.rateTypeService.getRateTypes();
-  }
-
 }

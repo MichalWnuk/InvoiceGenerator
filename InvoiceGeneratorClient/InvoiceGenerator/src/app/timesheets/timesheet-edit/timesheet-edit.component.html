@@ -6,6 +6,7 @@
 
 </div>
 <hr>
+<app-alert [message]="dayAddedMessage" *ngIf="finishedSaving" (alertClose)="onFinishedSaving()"></app-alert>
 <form [formGroup]="rowForm" (ngSubmit)="onSubmit()" *ngIf="isRowLoaded">
     <div class="btn-toolbar">
         <button type="submit" class="btn btn-new" *ngIf="isRowLoaded" [disabled]="!rowForm.valid">Save</button>
@@ -13,7 +14,7 @@
     </div>
     <div>
         <h3>
-            {{ this.loadedRow.rateType?.name }} Timesheet for {{ this.currentMonthString }}
+            {{ getRateTypeNameString(this.loadedRow.rateTypeId) }} Timesheet for {{ this.currentMonthString }}
         </h3>
     </div>
     <div class="form-group" formArrayName="days">
@@ -45,7 +46,7 @@
         </thead>
         <tbody>
             <tr *ngFor="let row of currentTimesheet.rows" [routerLink]="[]" [queryParams]="{Row: row.id}">
-                <td>{{ row.rateType?.name }}</td>
+                <td>{{ getRateTypeNameString(row.rateTypeId) }}</td>
                 <td>{{ getReportedHoursString(row) }}</td>
             </tr>
         </tbody>

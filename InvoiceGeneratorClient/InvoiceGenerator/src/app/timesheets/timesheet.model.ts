@@ -5,5 +5,5 @@ export class Timesheet {
     public date: Date;
     public rows: Row[];
     public state: string;
-    public invoiceNumber: string;
+    public userId: string;
 }

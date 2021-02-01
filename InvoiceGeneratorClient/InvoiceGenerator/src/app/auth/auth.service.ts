@@ -65,6 +65,9 @@ export class AuthService {
     if (!errorResponse.status) {
       return throwError(errorMessage);
     }
+    if (errorResponse.error?.message) {
+      return throwError(errorResponse.error.message);
+    }
     switch (errorResponse.status) {
       case 401:
         errorMessage = 'No such user or incorrect credentials.';
