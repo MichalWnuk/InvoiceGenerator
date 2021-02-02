@@ -60,7 +60,10 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "InvoiceGenerator:build"
+            "browserTarget": "InvoiceGenerator:build",
+            "sslKey": "..\\Certificates\\server.key",
+            "sslCert": "..\\Certificates\\server.crt",
+            "ssl": true
           },
           "configurations": {
             "production": {

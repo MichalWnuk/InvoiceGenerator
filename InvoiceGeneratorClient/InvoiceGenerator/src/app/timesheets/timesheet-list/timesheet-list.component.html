@@ -12,11 +12,10 @@
     </thead>
     <tbody>
         <tr *ngFor="let timesheet of timesheets" [routerLink]="[timesheet.id]">
-            <td>{{ timesheet.year }}</td>
-            <td>{{ timesheet.month }}</td>
+            <td>{{ getTimesheetYear(timesheet.date) }}</td>
+            <td>{{ getTimesheetMonthNumber(timesheet.date) }}</td>
             <td>{{ getTotalHours(timesheet) }}</td>
             <td>{{ timesheet.state }}</td>
-            <td>{{ timesheet.invoiceNumber }}</td>
         </tr>
     </tbody>
 </table>

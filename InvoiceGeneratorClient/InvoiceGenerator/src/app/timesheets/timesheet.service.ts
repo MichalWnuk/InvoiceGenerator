@@ -1,86 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { Day } from './day.model';
+import { Row } from './row.model';
 import { Timesheet } from './timesheet.model';
 
 @Injectable()
 export class TimesheetService {
   timesheetsChanged = new Subject<Timesheet[]>();
-  private timesheets: Timesheet[] = [
-    {
-      id: 1, year: 2020, month: 1, state: 'Open', invoiceNumber: '001', rows: [
-        {
-          id: 1, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        }
-      ]
-    },
-    {
-      id: 2, year: 2020, month: 2, state: 'Open', invoiceNumber: '002', rows: [
-        {
-          id: 2, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        }
-      ]
-    },
-    {
-      id: 3, year: 2020, month: 3, state: 'Open', invoiceNumber: '003', rows: [
-        {
-          id: 3, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        },
-        {
-          id: 4, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        },
-        {
-          id: 5, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        },
-        {
-          id: 6, rateType: { id: 1, name: 'STD', type: 'STD' }, days: [
-            { dayNumber: 1, reportedHours: 8 },
-            { dayNumber: 2, reportedHours: 8 },
-            { dayNumber: 3, reportedHours: 8 },
-            { dayNumber: 4, reportedHours: 8 },
-            { dayNumber: 5, reportedHours: 8 },
-          ]
-        }
-      ]
-    }
-  ];
+  private timesheets: Timesheet[] = [];
   constructor() { }
 
   setTimesheets(timesheets: Timesheet[]): void {
     this.timesheets = timesheets;
+    this.timesheetsChanged.next(this.getTimesheets());
   }
 
   getTimesheets(): Timesheet[] {
-    return this.timesheets.slice();
+    return this.timesheets.slice().sort((a, b) => b.date.valueOf() - a.date.valueOf());
   }
 
   getTimesheet(id: number): Timesheet {
@@ -92,9 +28,60 @@ export class TimesheetService {
     this.timesheetsChanged.next(this.getTimesheets());
   }
 
-  updateTimesheet(id: number, updatedTimesheet: Timesheet): void {
-    const index = this.timesheets.findIndex(timesheet => timesheet.id === id);
+  updateTimesheet(updatedTimesheet: Timesheet): void {
+    const index = this.timesheets.findIndex(timesheet => timesheet.id === updatedTimesheet.id);
     this.timesheets[index] = updatedTimesheet;
     this.timesheetsChanged.next(this.getTimesheets());
+  }
+
+  parseResponseTimesheetsToTimesheetsCollection(timesheets: Timesheet[]): Timesheet[] {
+    const output: Timesheet[] = [];
+    timesheets.forEach(timesheet => {
+      output.push(this.parseResponseTimesheetToTimesheetObject(timesheet));
+    });
+
+    return output;
+  }
+
+  parseResponseTimesheetToTimesheetObject(timesheet: Timesheet): Timesheet {
+    const timesheetRows: Row[] = [];
+    timesheet.rows.forEach(row => {
+      timesheetRows.push(this.parseResponseRowToRowObject(row));
+    });
+
+    const output: Timesheet = {
+      id: +timesheet.id,
+      date: new Date(timesheet.date),
+      state: timesheet.state,
+      userId: timesheet.userId,
+      rows: timesheetRows
+    };
+
+    return output;
+  }
+
+  private parseResponseRowToRowObject(row: Row): Row {
+    const rowDays: Day[] = [];
+    row.days.forEach(day => {
+      rowDays.push(this.parseResponseDayToDayObject(day));
+    });
+
+    const output: Row = {
+      id: +row.id,
+      rateTypeId: row.rateTypeId,
+      days: rowDays,
+      timesheetId: row.timesheetId
+    };
+
+    return output;
+  }
+
+  private parseResponseDayToDayObject(day: Day): Day {
+    const output: Day = {
+      date: new Date(day.date),
+      reportedHours: +day.reportedHours
+    };
+
+    return output;
   }
 }

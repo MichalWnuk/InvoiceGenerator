@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.75);
+  background: #3926006c;
   z-index: 50;
 }
 
@@ -16,5 +16,5 @@
   padding: 16px;
   z-index: 100;
   background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  box-shadow: 0 2px 8px #3926006c;
 }
