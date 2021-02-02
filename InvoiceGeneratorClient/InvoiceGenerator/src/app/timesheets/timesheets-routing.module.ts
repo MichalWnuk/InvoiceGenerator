@@ -7,7 +7,12 @@ import { TimesheetResolver } from './timesheet.resolver';
 import { TimesheetsComponent } from './timesheets.component';
 
 const routes: Routes = [
-    { path: '', component: TimesheetsComponent, canActivate: [AuthGuard], resolve: [RateTypeResolver, TimesheetResolver] },
+    {
+        path: '', component: TimesheetsComponent, canActivate: [AuthGuard], resolve: [
+            RateTypeResolver,
+            TimesheetResolver
+        ]
+    },
     { path: ':id', component: TimesheetEditComponent, canActivate: [AuthGuard], resolve: [RateTypeResolver] }
 ];
 

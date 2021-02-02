@@ -2,15 +2,20 @@
 </app-timesheet-row-add>
 <div class="btn-toolbar">
     <button type="button" class="btn btn-new" (click)="onBackToList()">Back to List</button>
-    <button type="button" class="btn btn-new" (click)="onAddRow()" *ngIf="!isRowLoaded">Add Row</button>
+    <button type="button" class="btn btn-new" (click)="onAddRow()" *ngIf="!isRowLoaded && isTimesheetEditable">Add
+        Row</button>
+    <button type="button" class="btn btn-new" (click)="onSendTimesheet()"
+        *ngIf="!isRowLoaded && isTimesheetEditable">Send Timesheet</button>
 
 </div>
 <hr>
 <app-alert [message]="dayAddedMessage" *ngIf="finishedSaving" (alertClose)="onFinishedSaving()"></app-alert>
 <form [formGroup]="rowForm" (ngSubmit)="onSubmit()" *ngIf="isRowLoaded">
     <div class="btn-toolbar">
-        <button type="submit" class="btn btn-new" *ngIf="isRowLoaded" [disabled]="!rowForm.valid">Save</button>
-        <button type="button" class="btn btn-new" (click)="onAddDay()" *ngIf="isRowLoaded">Add Day</button>
+        <button type="submit" class="btn btn-new" *ngIf="isRowLoaded && isTimesheetEditable"
+            [disabled]="!rowForm.valid">Save</button>
+        <button type="button" class="btn btn-new" (click)="onAddDay()" *ngIf="isRowLoaded && isTimesheetEditable">Add
+            Day</button>
     </div>
     <div>
         <h3>
@@ -21,13 +26,15 @@
         <div class="row" *ngFor="let dayControl of controls; let i = index" [formGroupName]="i">
             <div class="col-xs-2">
                 <input type="date" class="form-control" formControlName="day" [min]="this.minDateForCurrentTimesheet"
-                    [max]="this.maxDateForCurrentTimesheet">
+                    [max]="this.maxDateForCurrentTimesheet" [attr.disabled]="!isTimesheetEditable">
             </div>
             <div class="col-xs-1">
-                <input type="number" class="form-control" formControlName="reportedHours" min="0" max="24">
+                <input type="number" class="form-control" formControlName="reportedHours" min="0" max="24"
+                    [attr.disabled]="!isTimesheetEditable">
             </div>
             <div class="col-xs-1">
-                <button type="button" class="btn btn-remove" (click)="onRemoveDay(i)">X</button>
+                <button type="button" class="btn btn-remove" (click)="onRemoveDay(i)"
+                    [disabled]="!isTimesheetEditable">X</button>
             </div>
         </div>
     </div>

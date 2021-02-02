@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using InvoiceGeneratorAPI.Const;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InvoiceGeneratorAPI.DAL;
@@ -87,7 +88,21 @@ namespace InvoiceGeneratorAPI.Controllers
             }
 
             var timesheetObj = DtoToModel.DtoToTimesheet(timesheet);
-            
+
+            var validStates = States.GetStatesValues();
+
+            if (!validStates.Contains(timesheet.State))
+            {
+                return BadRequest();
+            }
+
+            var isModificationAllowed = (await _context.Timesheet.FindAsync(id)).State != States.Closed;
+
+            if (!isModificationAllowed)
+            {
+                return BadRequest();
+            }
+
             // new Rows
             var newRows = timesheetObj.Rows.Where(row => row.Id.Equals(0));
 
@@ -140,6 +155,13 @@ namespace InvoiceGeneratorAPI.Controllers
             }
 
             var timesheetObj = DtoToModel.DtoToTimesheet(timesheet);
+
+            var validStates = States.GetStatesValues();
+
+            if (!validStates.Contains(timesheet.State))
+            {
+                return BadRequest();
+            }
 
             await _context.Timesheet.AddAsync(timesheetObj);
             await _context.SaveChangesAsync();

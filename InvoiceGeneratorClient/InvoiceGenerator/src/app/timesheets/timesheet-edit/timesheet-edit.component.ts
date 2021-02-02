@@ -53,6 +53,10 @@ export class TimesheetEditComponent implements OnInit, OnDestroy {
     return 'Timesheet saved.';
   }
 
+  get isTimesheetEditable(): boolean {
+    return this.currentTimesheet.state !== 'Closed';
+  }
+
   ngOnInit(): void {
     this.headers = [
       'Row Type',
@@ -175,6 +179,14 @@ export class TimesheetEditComponent implements OnInit, OnDestroy {
 
   onFinishedSaving(): void {
     this.finishedSaving = false;
+  }
+
+  onSendTimesheet(): void {
+    this.currentTimesheet.state = 'Closed';
+    this.updateTimesheetSub = this.dataStorageService.updateTimesheet(this.currentTimesheet).subscribe(data => {
+      this.finishedSaving = true;
+    });
+    this.timesheetService.updateTimesheet(this.currentTimesheet);
   }
 
   private navigateOneStepUp(): void {

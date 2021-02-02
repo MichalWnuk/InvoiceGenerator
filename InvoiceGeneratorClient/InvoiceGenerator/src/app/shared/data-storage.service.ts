@@ -9,7 +9,11 @@ import { TimesheetService } from '../timesheets/timesheet.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataStorageService {
-    constructor(private http: HttpClient, private rateTypeService: RateTypeService, private timesheetService: TimesheetService) { }
+    constructor(
+        private http: HttpClient,
+        private rateTypeService: RateTypeService,
+        private timesheetService: TimesheetService
+    ) { }
 
     fetchRateTypes(): Observable<RateType[]> {
         return this.http.get<RateType[]>('https://localhost:44395/api/RateTypes').pipe(
