@@ -18,6 +18,7 @@ namespace InvoiceGeneratorAPI.DAL
             modelBuilder.Entity<RateType>().ToTable("RateTypes");
             modelBuilder.Entity<Row>().ToTable("Rows");
             modelBuilder.Entity<Timesheet>().ToTable("Timesheets");
+            modelBuilder.Entity<UserRateAmount>().ToTable("UserRateAmounts");
             SeedInitialData(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
@@ -38,5 +39,6 @@ namespace InvoiceGeneratorAPI.DAL
         public DbSet<Timesheet> Timesheet { get; set; }
         public DbSet<Row> Row { get; set; }
         public DbSet<RateType> RateType { get; set; }
+        public DbSet<UserRateAmount> UserRateAmount { get; set; }
     }
 }

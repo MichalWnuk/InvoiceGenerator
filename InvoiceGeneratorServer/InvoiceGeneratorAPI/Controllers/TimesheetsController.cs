@@ -33,12 +33,7 @@ namespace InvoiceGeneratorAPI.Controllers
         {
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
 
-            var timesheets = new List<Timesheet>();
-
-            if (currentUser != null)
-            {
-                timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id)).ToList();
-            }
+            var timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id)).ToList();
 
             var dtos = ModelToDto.TimesheetsToDtos(timesheets);
             return dtos;
@@ -80,7 +75,7 @@ namespace InvoiceGeneratorAPI.Controllers
 
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
 
-            var isCorrectUser = _context.Timesheet.Any(t => t.Id == id && t.UserId == currentUser.Id);
+            var isCorrectUser = _context.Timesheet.AsNoTracking().Any(t => t.Id == id && t.UserId == currentUser.Id);
 
             if (!isCorrectUser)
             {
@@ -96,7 +91,7 @@ namespace InvoiceGeneratorAPI.Controllers
                 return BadRequest();
             }
 
-            var isModificationAllowed = (await _context.Timesheet.FindAsync(id)).State != States.Closed;
+            var isModificationAllowed = _context.Timesheet.AsNoTracking().First(t => t.Id.Equals(id)).State != States.Closed;
 
             if (!isModificationAllowed)
             {
@@ -143,7 +138,6 @@ namespace InvoiceGeneratorAPI.Controllers
         }
 
         // POST: api/Timesheets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TimesheetDTO>> PostTimesheet(TimesheetDTO timesheet)
         {

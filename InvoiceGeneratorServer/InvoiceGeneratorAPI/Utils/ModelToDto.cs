@@ -22,7 +22,13 @@ namespace InvoiceGeneratorAPI.Utils
             return timesheetDto;
         }
 
-        public static RowDTO RowToDto(Row row)
+        public static IEnumerable<UserRateAmountDTO> RateAmountsToDtos(IEnumerable<UserRateAmount> rateAmounts)
+        {
+            var rateAmountList = rateAmounts.ToList();
+            return rateAmountList.Any() ? rateAmountList.Select(RateAmountToDto) : Enumerable.Empty<UserRateAmountDTO>();
+        }
+
+        private static RowDTO RowToDto(Row row)
         {
             ICollection<DayDTO> days = DaysCollectionToDto(row.Days);
             var rowDto = new RowDTO {Days = days, Id = row.Id, RateTypeId = row.RateTypeId, TimesheetId = row.TimesheetId };
@@ -40,6 +46,13 @@ namespace InvoiceGeneratorAPI.Utils
             var dto = JsonSerializer.Deserialize<ICollection<DayDTO>>(day);
 
             return dto;
+        }
+
+        private static UserRateAmountDTO RateAmountToDto(UserRateAmount rateAmount)
+        {
+            var rateAmountDto = new UserRateAmountDTO { RateName = rateAmount.RateType.DisplayName, RateAmount = rateAmount.RateAmount };
+
+            return rateAmountDto;
         }
     }
 }

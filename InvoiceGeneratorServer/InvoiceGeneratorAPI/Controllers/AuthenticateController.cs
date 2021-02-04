@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using InvoiceGeneratorAPI.Models;
 using InvoiceGeneratorAPI.Const;
+using InvoiceGeneratorAPI.DAL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,13 +23,15 @@ namespace InvoiceGeneratorAPI.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly DatabaseContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthenticateController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthenticateController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, DatabaseContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _context = context;
         }
 
         // POST: api/Login
@@ -109,6 +113,16 @@ namespace InvoiceGeneratorAPI.Controllers
                 Username = user.UserName,
                 Password = model.Password
             };
+
+            var currentRateTypes = await _context.RateTypes.ToListAsync();
+
+            foreach (var rateType in currentRateTypes)
+            {
+                await _context.UserRateAmount.AddAsync(new UserRateAmount
+                    {Id = 0, RateAmount = 0, RateTypeId = rateType.Id, UserId = user.Id});
+            }
+
+            await _context.SaveChangesAsync();
 
             return await Login(loginModel);
         }
