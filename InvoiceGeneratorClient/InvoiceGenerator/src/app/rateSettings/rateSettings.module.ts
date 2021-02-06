@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
-import { SettingsComponent } from './settings.component';
+import { RateSettingsComponent } from './rateSettings.component';
 import { SharedModule } from '../shared/shared.module';
-import { SettingsRoutingModule } from './settings-routing.module';
+import { RateSettingsRoutingModule } from './rateSettings-routing.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
 @NgModule({
-  declarations: [SettingsComponent],
+  declarations: [RateSettingsComponent],
   imports: [
     SharedModule,
-    SettingsRoutingModule,
+    RateSettingsRoutingModule,
     FormsModule,
     ReactiveFormsModule
   ]
 })
-export class SettingsModule { }
+export class RateSettingsModule { }

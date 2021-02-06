@@ -2,9 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Settings } from '../settings/settings.model';
-import { SettingsService } from '../settings/settings.service';
-import { SettingsItem } from '../settings/settingsItem.model';
+import { InvoiceSettings } from '../invoiceSettings/invoiceSettings.model';
+import { InvoiceSettingsService } from '../invoiceSettings/invoiceSettings.service';
+import { RateSettings } from '../rateSettings/rateSettings.model';
+import { RateSettingsService } from '../rateSettings/rateSettings.service';
+import { RateSettingsItem } from '../rateSettings/rateSettingsItem.model';
 import { RateType } from '../timesheets/rateType.model';
 import { RateTypeService } from '../timesheets/ratetype.service';
 import { Timesheet } from '../timesheets/timesheet.model';
@@ -16,7 +18,8 @@ export class DataStorageService {
         private http: HttpClient,
         private rateTypeService: RateTypeService,
         private timesheetService: TimesheetService,
-        private settingsService: SettingsService
+        private rateSettingsService: RateSettingsService,
+        private invoiceSettingsService: InvoiceSettingsService
     ) { }
 
     fetchRateTypes(): Observable<RateType[]> {
@@ -36,11 +39,19 @@ export class DataStorageService {
         );
     }
 
-    fetchUserSettings(): Observable<Settings> {
+    fetchUserRateSettings(): Observable<RateSettings> {
         return this.http.get<any>('https://localhost:44395/api/RateAmounts').pipe(
             tap(settings => {
-                const settingsToSet: Settings = this.settingsService.parseResponseSettingsToSettings(settings);
-                this.settingsService.setSettings(settingsToSet);
+                const settingsToSet: RateSettings = this.rateSettingsService.parseResponseSettingsToSettings(settings);
+                this.rateSettingsService.setSettings(settingsToSet);
+            })
+        );
+    }
+
+    fetchUserInvoiceSettings(): Observable<InvoiceSettings> {
+        return this.http.get<any>('https://localhost:44395/api/InvoiceSettings').pipe(
+            tap(settings => {
+                this.invoiceSettingsService.setSettings(settings);
             })
         );
     }
@@ -58,7 +69,11 @@ export class DataStorageService {
         return this.http.put<void>(`https://localhost:44395/api/Timesheets/${timesheet.id}`, timesheet);
     }
 
-    updateSettings(settings: SettingsItem[]): Observable<void> {
+    updateRateSettings(settings: RateSettingsItem[]): Observable<void> {
         return this.http.put<void>('https://localhost:44395/api/RateAmounts', settings);
+    }
+
+    updateInvoiceSettings(settings: InvoiceSettings): Observable<void> {
+        return this.http.put<void>('https://localhost:44395/api/InvoiceSettings', settings);
     }
 }

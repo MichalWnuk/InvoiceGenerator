@@ -7,7 +7,8 @@ const appRoutes: Routes = [
     { path: 'Timesheets', loadChildren: () => import('./timesheets/timesheets.module').then(m => m.TimesheetsModule) },
     { path: 'Invoices', loadChildren: () => import('./invoices/invoices.module').then(m => m.InvoicesModule) },
     { path: 'Auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule) },
-    { path: 'Settings', loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule) }
+    { path: 'RateSettings', loadChildren: () => import('./rateSettings/rateSettings.module').then(m => m.RateSettingsModule) },
+    { path: 'InvoiceSettings', loadChildren: () => import('./invoiceSettings/invoiceSettings.module').then(m => m.InvoiceSettingsModule) }
 ];
 
 @NgModule({

@@ -28,6 +28,26 @@ namespace InvoiceGeneratorAPI.Utils
             return rateAmountList.Any() ? rateAmountList.Select(RateAmountToDto) : Enumerable.Empty<UserRateAmountDTO>();
         }
 
+        public static InvoiceSettingsDTO InvoiceSettingsToDTO(UserInvoiceSettings settings)
+        {
+            return new()
+            {
+                BuyerAddressLine1 = settings.BuyerAddressLine1,
+                BuyerAddressLine2 = settings.BuyerAddressLine2,
+                BuyerName = settings.BuyerName,
+                BuyerPhone = settings.BuyerPhone,
+                BuyerTaxId = settings.BuyerTaxId,
+                IssuedBy = settings.IssuedBy,
+                SellerAccountNumber = settings.SellerAccountNumber,
+                SellerAddressLine1 = settings.SellerAddressLine1,
+                SellerAddressLine2 = settings.SellerAddressLine2,
+                SellerBankName = settings.SellerBankName,
+                SellerEmail = settings.SellerEmail,
+                SellerName = settings.SellerName,
+                SellerTaxId = settings.SellerTaxId
+            };
+        }
+
         private static RowDTO RowToDto(Row row)
         {
             ICollection<DayDTO> days = DaysCollectionToDto(row.Days);

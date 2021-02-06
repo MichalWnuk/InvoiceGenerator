@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '../auth/auth.guard';
-import { SettingsComponent } from './settings.component';
-import { SettingsResolver } from './settings.resolver';
+import { RateSettingsComponent } from './rateSettings.component';
+import { RateSettingsResolver } from './rateSettings.resolver';
 
 const routes: Routes = [
     {
-        path: '', component: SettingsComponent, canActivate: [AuthGuard], resolve: [SettingsResolver]
+        path: '', component: RateSettingsComponent, canActivate: [AuthGuard], resolve: [RateSettingsResolver]
     }
 ];
 
@@ -19,4 +19,4 @@ const routes: Routes = [
         RouterModule
     ]
 })
-export class SettingsRoutingModule { }
+export class RateSettingsRoutingModule { }
