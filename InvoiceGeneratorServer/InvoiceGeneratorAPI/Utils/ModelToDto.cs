@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using InvoiceGeneratorAPI.DTO;
 using InvoiceGeneratorAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceGeneratorAPI.Utils
 {
@@ -73,6 +74,19 @@ namespace InvoiceGeneratorAPI.Utils
             var rateAmountDto = new UserRateAmountDTO { RateName = rateAmount.RateType.DisplayName, RateAmount = rateAmount.RateAmount };
 
             return rateAmountDto;
+        }
+
+        public static InvoiceDTO InvoiceToDTO(Invoice invoice)
+        {
+            return new()
+            {
+                Id = invoice.Id,
+                InvoiceNumber = invoice.InvoiceNumber,
+                GeneratedDate = invoice.GeneratedDate,
+                TimesheetId = invoice.TimesheetId,
+                InvoiceForMonth = invoice.Timesheet.Date.Month.ToString(),
+                InvoiceForYear = invoice.Timesheet.Date.Year.ToString(),
+            };
         }
     }
 }

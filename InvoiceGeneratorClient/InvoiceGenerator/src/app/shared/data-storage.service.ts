@@ -1,7 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { Invoice } from '../invoices/invoice.model';
+import { InvoiceService } from '../invoices/invoice.service';
 import { InvoiceSettings } from '../invoiceSettings/invoiceSettings.model';
 import { InvoiceSettingsService } from '../invoiceSettings/invoiceSettings.service';
 import { RateSettings } from '../rateSettings/rateSettings.model';
@@ -19,7 +21,8 @@ export class DataStorageService {
         private rateTypeService: RateTypeService,
         private timesheetService: TimesheetService,
         private rateSettingsService: RateSettingsService,
-        private invoiceSettingsService: InvoiceSettingsService
+        private invoiceSettingsService: InvoiceSettingsService,
+        private invoiceService: InvoiceService
     ) { }
 
     fetchRateTypes(): Observable<RateType[]> {
@@ -49,9 +52,26 @@ export class DataStorageService {
     }
 
     fetchUserInvoiceSettings(): Observable<InvoiceSettings> {
-        return this.http.get<any>('https://localhost:44395/api/InvoiceSettings').pipe(
+        return this.http.get<InvoiceSettings>('https://localhost:44395/api/InvoiceSettings').pipe(
             tap(settings => {
                 this.invoiceSettingsService.setSettings(settings);
+            })
+        );
+    }
+
+    getInvoice(id: number): Observable<any> {
+        return this.http.get(`https://localhost:44395/api/Invoices/${id}`, { responseType: 'arraybuffer' }).pipe(
+            tap(invoiceBuffer => {
+
+            })
+        );
+    }
+
+    fetchUserInvoices(): Observable<Invoice[]> {
+        return this.http.get<Invoice[]>('https://localhost:44395/api/Invoices').pipe(
+            tap(invoices => {
+                const invoicesToSet: Invoice[] = this.invoiceService.parseResponseInvoicesToInvoicesCollection(invoices);
+                this.invoiceService.setInvoices(invoicesToSet);
             })
         );
     }
@@ -75,5 +95,37 @@ export class DataStorageService {
 
     updateInvoiceSettings(settings: InvoiceSettings): Observable<void> {
         return this.http.put<void>('https://localhost:44395/api/InvoiceSettings', settings);
+    }
+
+    createInvoice(invoice: Invoice): Observable<Invoice> {
+        return this.http.post<Invoice>('https://localhost:44395/api/Invoices', invoice).pipe(
+            catchError(this.handleError), tap(invoiceToAdd => {
+                const parsedInvoice = this.invoiceService.parseResponseInvoiceToInvoiceObject(invoiceToAdd);
+                this.invoiceService.addInvoice(parsedInvoice);
+            })
+        );
+    }
+
+    updateInvoiceBlob(arrayBuffer: ArrayBuffer, id: number): Observable<void> {
+        return this.http.patch<void>(`https://localhost:44395/api/Invoices?id=${id}`, arrayBuffer);
+    }
+
+    private handleError(errorResponse: HttpErrorResponse): Observable<never> {
+        let errorMessage = 'An unknown error occured!';
+        if (!errorResponse.status) {
+            return throwError(errorMessage);
+        }
+        if (errorResponse.error?.message) {
+            return throwError(errorResponse.error.message);
+        }
+        switch (errorResponse.status) {
+            case 401:
+                errorMessage = 'No such user or incorrect credentials.';
+                break;
+            case 403:
+                errorMessage = 'You are not authorized to view this resource.';
+                break;
+        }
+        return throwError(errorMessage);
     }
 }

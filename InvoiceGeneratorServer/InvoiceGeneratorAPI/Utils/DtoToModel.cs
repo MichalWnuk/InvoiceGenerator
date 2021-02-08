@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using AutoMapper.Internal;
@@ -24,6 +25,19 @@ namespace InvoiceGeneratorAPI.Utils
             rows.ForAll(row => timesheet.Rows.Add(row));
 
             return timesheet;
+        }
+
+        public static Invoice DtoToInvoice(InvoiceDTO dto)
+        {
+            var invoice = new Invoice
+            {
+                Id = 0,
+                GeneratedDate = DateTime.Today,
+                FileArray = Array.Empty<byte>(),
+                TimesheetId = dto.TimesheetId
+            };
+
+            return invoice;
         }
 
         private static ICollection<Row> DtosToRows(IEnumerable<RowDTO> dtos)

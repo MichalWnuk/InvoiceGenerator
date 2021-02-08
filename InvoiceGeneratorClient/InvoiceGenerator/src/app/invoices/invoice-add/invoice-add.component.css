@@ -8,17 +8,13 @@
   z-index: 50;
 }
 
-.alert-box {
+.message-box {
   position: fixed;
   top: 30vh;
-  left: 20vw;
-  width: 60vw;
+  left: 40vw;
+  width: 20vw;
   padding: 16px;
-  z-index: 10000;
+  z-index: 100;
   background-color: white;
   box-shadow: 0 2px 8px #3926006c;
-}
-
-.alert-box-actions {
-  text-align: right;
 }

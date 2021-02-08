@@ -1,0 +1,21 @@
+tbody tr {
+  cursor: pointer;
+}
+
+tbody :hover {
+  background-color: #9e9c98;
+  color: #ffffff;
+}
+
+th {
+  background-color: #333333;
+  color: #e1a626;
+}
+
+tr:nth-child(even) {
+  background-color: #ffeecb;
+}
+
+tr:nth-child(odd) {
+  background-color: rgb(241, 241, 241);
+}

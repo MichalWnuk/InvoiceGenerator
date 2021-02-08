@@ -23,10 +23,6 @@ import { TimesheetRowAddComponent } from './timesheet-row-add/timesheet-row-add.
     TimesheetsRoutingModule,
     FormsModule,
     ReactiveFormsModule
-  ],
-  exports: [
-    TimesheetsComponent,
-    TimesheetListComponent
   ]
 })
 export class TimesheetsModule { }

@@ -4,14 +4,16 @@ using InvoiceGeneratorAPI.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InvoiceGeneratorAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210207102536_RemovedBlobFromInvoice")]
+    partial class RemovedBlobFromInvoice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,10 +92,6 @@ namespace InvoiceGeneratorAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .UseIdentityColumn();
-
-                    b.Property<byte[]>("FileArray")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<DateTime>("GeneratedDate")
                         .HasColumnType("datetime2");
