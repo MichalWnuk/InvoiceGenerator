@@ -1,4 +1,5 @@
-﻿using System;
+﻿// ReSharper disable All
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace InvoiceGeneratorAPI.Migrations

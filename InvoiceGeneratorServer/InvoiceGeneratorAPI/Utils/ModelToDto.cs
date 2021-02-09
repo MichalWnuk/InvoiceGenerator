@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using InvoiceGeneratorAPI.DTO;
 using InvoiceGeneratorAPI.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceGeneratorAPI.Utils
 {
