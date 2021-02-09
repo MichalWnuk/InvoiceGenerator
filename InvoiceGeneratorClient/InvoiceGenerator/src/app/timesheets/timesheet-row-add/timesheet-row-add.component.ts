@@ -31,8 +31,13 @@ export class TimesheetRowAddComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.updateTimesheetSub.unsubscribe();
-    this.refreshTimesheetsSub.unsubscribe();
+    if (this.updateTimesheetSub) {
+      this.updateTimesheetSub.unsubscribe();
+    }
+
+    if (this.updateTimesheetSub) {
+      this.refreshTimesheetsSub.unsubscribe();
+    }
   }
 
   onClose(): void {

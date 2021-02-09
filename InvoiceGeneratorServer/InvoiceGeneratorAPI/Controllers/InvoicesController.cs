@@ -10,7 +10,6 @@ using InvoiceGeneratorAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System;
-using System.Net.Http;
 using InvoiceGeneratorAPI.Utils;
 
 namespace InvoiceGeneratorAPI.Controllers
@@ -78,7 +77,7 @@ namespace InvoiceGeneratorAPI.Controllers
 
         // POST: api/Invoices
         [HttpPost]
-        public async Task<ActionResult<InvoiceDTO>> PostInvoice(InvoiceDTO invoice)
+        public async Task<ActionResult<InvoiceDataDTO>> PostInvoice(InvoiceDTO invoice)
         {
             var user = await _userManager.FindByNameAsync(User?.Identity?.Name);
 
@@ -87,23 +86,35 @@ namespace InvoiceGeneratorAPI.Controllers
                 return Forbid();
             }
 
-            var isInvoiceValid = !_context.Invoice.Any(i => i.TimesheetId.Equals(invoice.TimesheetId));
+            var isInvoiceValid = !_context.Invoice.Any(i => i.TimesheetId.Equals(invoice.TimesheetId)) &&
+                                 _context.Timesheet.Any(t =>
+                                     t.Id.Equals(invoice.TimesheetId) && t.State.Equals(Const.States.Closed));
 
             if (!isInvoiceValid)
             {
-                return BadRequest(new { Message = "Invoice for the provided Timesheet is already created!"});
+                return BadRequest(new { Message = "Cannot create new invoice for provided timesheet!"});
             }
 
+            var invoiceTimesheet = await _context.Timesheet.FindAsync(invoice.TimesheetId);
+
             var invoiceObj = DtoToModel.DtoToInvoice(invoice);
-            invoiceObj.InvoiceNumber = $"1/{DateTime.Now.Month}/{DateTime.Now.Year}";
+            invoiceObj.InvoiceNumber = $"1/{invoiceTimesheet.Date.Month}/{invoiceTimesheet.Date.Year}";
             invoiceObj.UserId = user.Id;
 
             await _context.Invoice.AddAsync(invoiceObj);
             await _context.SaveChangesAsync();
 
-            await _context.Entry(invoiceObj).Reference(i => i.Timesheet).LoadAsync();
+            var obj = _context.Invoice.Include(i => i.Timesheet).Include(i => i.Timesheet.Rows)
+                .First(i => i.Id.Equals(invoiceObj.Id));
 
-            var dto = ModelToDto.InvoiceToDTO(invoiceObj);
+            var invoiceSettings = await _context.UserInvoiceSettings.FirstAsync(settings => settings.UserId.Equals(user.Id));
+            var invoiceSettingsDto = ModelToDto.InvoiceSettingsToDTO(invoiceSettings);
+
+            var rateTypes = _context.RateTypes.ToList();
+
+            var userRateAmounts = _context.UserRateAmount.Where(amount => amount.UserId.Equals(user.Id)).ToList();
+
+            var dto = ModelToDto.InvoiceToDto(obj, invoiceSettingsDto, rateTypes, userRateAmounts);
 
             return dto;
         }
@@ -147,24 +158,5 @@ namespace InvoiceGeneratorAPI.Controllers
             return NoContent();
 
         }
-
-        //// POST: api/Invoices
-        //[HttpPost]
-        //public async Task<ActionResult<Invoice>> PostInvoice()
-        //{
-        //    var user = await _userManager.FindByNameAsync(User?.Identity?.Name);
-
-        //    if (user == null)
-        //    {
-        //        return Forbid();
-        //    }
-
-        //    using (var stream = new StreamReader(Request.Body))
-        //    {
-        //        var file = await stream.ReadToEndAsync();
-        //    }
-
-        //    return Ok();
-        //}
     }
 }

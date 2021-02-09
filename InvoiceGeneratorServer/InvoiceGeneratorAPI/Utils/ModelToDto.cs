@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using InvoiceGeneratorAPI.DTO;
@@ -76,17 +78,60 @@ namespace InvoiceGeneratorAPI.Utils
             return rateAmountDto;
         }
 
-        public static InvoiceDTO InvoiceToDTO(Invoice invoice)
+        public static InvoiceDataDTO InvoiceToDto(Invoice invoice, InvoiceSettingsDTO invoiceSettingsDTO, ICollection<RateType> rateTypes, ICollection<UserRateAmount> rateAmounts)
         {
-            return new()
+            var timesheetDto = TimesheetToDto(invoice.Timesheet);
+            var summaryNetAmount = TimesheetDtoToSummaryNetAmount(timesheetDto, rateAmounts);
+
+            return new InvoiceDataDTO()
             {
-                Id = invoice.Id,
+                Id = invoice.Id.ToString(),
+                IssuedDate = invoice.GeneratedDate.ToShortDateString(),
+                IssuedPlace = "Wroclaw",
                 InvoiceNumber = invoice.InvoiceNumber,
-                GeneratedDate = invoice.GeneratedDate,
-                TimesheetId = invoice.TimesheetId,
+                InvoiceSettings = invoiceSettingsDTO,
+                InvoiceItems = TimesheetDtoToInvoiceItemDtos(timesheetDto, rateTypes, rateAmounts),
+                TimesheetId = timesheetDto.Id.ToString(),
                 InvoiceForMonth = invoice.Timesheet.Date.Month.ToString(),
                 InvoiceForYear = invoice.Timesheet.Date.Year.ToString(),
+                TaxRate = "23%",
+                SummaryNetAmount = summaryNetAmount.ToString(CultureInfo.InvariantCulture),
+                SummaryTaxAmount = Math.Round(summaryNetAmount * 0.23, 2).ToString(CultureInfo.InvariantCulture),
+                SummaryGrossAmount = Math.Round(summaryNetAmount * 1.23, 2).ToString(CultureInfo.InvariantCulture),
+                PayToDate = invoice.GeneratedDate.AddDays(30).ToShortDateString(),
+                SellDate = invoice.GeneratedDate.ToShortDateString(),
+                IssuedBy = invoiceSettingsDTO.IssuedBy
             };
+        }
+
+        private static ICollection<InvoiceItemDTO> TimesheetDtoToInvoiceItemDtos(TimesheetDTO dto, ICollection<RateType> rateTypes, ICollection<UserRateAmount> rateAmounts)
+        {
+            return (from row in dto.Rows
+                let hoursCount = row.Days.Sum(day => day.ReportedHours)
+                let netPrice = rateAmounts.First(amount => amount.RateTypeId.Equals(row.RateTypeId)).RateAmount
+                let netAmount = hoursCount * netPrice
+                select new InvoiceItemDTO()
+                {
+                    Title = rateTypes.First(type => type.Id.Equals(row.RateTypeId)).DisplayName,
+                    Count = hoursCount.ToString(CultureInfo.InvariantCulture),
+                    GrossAmount = Math.Round(netAmount * 1.23, 2).ToString(CultureInfo.InvariantCulture),
+                    NetAmount = Math.Round(netAmount, 2).ToString(CultureInfo.InvariantCulture),
+                    Metric = "godzina",
+                    NetPrice = netPrice.ToString(CultureInfo.InvariantCulture),
+                    TaxAmount = Math.Round(netAmount * 0.23, 2).ToString(CultureInfo.InvariantCulture),
+                    TaxRate = "23%"
+                }).ToList();
+        }
+
+        private static double TimesheetDtoToSummaryNetAmount(TimesheetDTO dto, ICollection<UserRateAmount> rateAmounts)
+        {
+            var output = (from row in dto.Rows
+                let hoursCount = row.Days.Sum(day => day.ReportedHours)
+                let netPrice = rateAmounts.First(amount => amount.RateTypeId.Equals(row.RateTypeId))
+                    .RateAmount
+                select Math.Round(hoursCount * netPrice, 2)).Sum();
+
+            return output;
         }
     }
 }

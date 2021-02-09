@@ -11,7 +11,8 @@
                 <div class="form-group" *ngIf="!error">
                     <label for="timesheet">Create Invoice for: </label>
                     <select id="timesheet" id="timesheet" name="timesheet" class="form-control" ngModel required>
-                        <option *ngFor="let timesheet of timesheets" [value]="timesheet.id">{{ timesheet.date }}
+                        <option *ngFor="let timesheet of timesheets" [value]="timesheet.id">{{
+                            gettimesheetDropdownDisplay(timesheet) }}
                         </option>
                     </select>
                 </div>

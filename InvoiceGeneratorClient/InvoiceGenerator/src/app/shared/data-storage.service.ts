@@ -1,7 +1,8 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
+import { InvoiceData } from '../invoices/invoice-data.model';
 import { Invoice } from '../invoices/invoice.model';
 import { InvoiceService } from '../invoices/invoice.service';
 import { InvoiceSettings } from '../invoiceSettings/invoiceSettings.model';
@@ -42,6 +43,14 @@ export class DataStorageService {
         );
     }
 
+    fetchUserClosedTimesheets(): Observable<Timesheet[]> {
+        return this.http.get<Timesheet[]>('https://localhost:44395/api/Timesheets?State=Closed').pipe(
+            map(timesheets => {
+                return this.timesheetService.parseResponseTimesheetsToTimesheetsCollection(timesheets);
+            })
+        );
+    }
+
     fetchUserRateSettings(): Observable<RateSettings> {
         return this.http.get<any>('https://localhost:44395/api/RateAmounts').pipe(
             tap(settings => {
@@ -78,6 +87,7 @@ export class DataStorageService {
 
     createTimesheet(timesheet: Timesheet): Observable<Timesheet> {
         return this.http.post<Timesheet>('https://localhost:44395/api/Timesheets', timesheet).pipe(
+            catchError(this.handleError),
             tap(createdTimesheet => {
                 const timesheetToAdd: Timesheet = this.timesheetService.parseResponseTimesheetToTimesheetObject(createdTimesheet);
                 this.timesheetService.addTimesheet(timesheetToAdd);
@@ -97,10 +107,11 @@ export class DataStorageService {
         return this.http.put<void>('https://localhost:44395/api/InvoiceSettings', settings);
     }
 
-    createInvoice(invoice: Invoice): Observable<Invoice> {
-        return this.http.post<Invoice>('https://localhost:44395/api/Invoices', invoice).pipe(
-            catchError(this.handleError), tap(invoiceToAdd => {
-                const parsedInvoice = this.invoiceService.parseResponseInvoiceToInvoiceObject(invoiceToAdd);
+    createInvoice(invoice: Invoice): Observable<InvoiceData> {
+        return this.http.post<InvoiceData>('https://localhost:44395/api/Invoices', invoice).pipe(
+            catchError(this.handleError),
+            tap(invoiceToAdd => {
+                const parsedInvoice = this.invoiceService.parseResponseInvoiceDataToInvoiceObject(invoiceToAdd);
                 this.invoiceService.addInvoice(parsedInvoice);
             })
         );

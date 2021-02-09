@@ -119,8 +119,10 @@ namespace InvoiceGeneratorAPI.Controllers
             foreach (var rateType in currentRateTypes)
             {
                 await _context.UserRateAmount.AddAsync(new UserRateAmount
-                    {Id = 0, RateAmount = 0, RateTypeId = rateType.Id, UserId = user.Id});
+                    { Id = 0, RateAmount = 0, RateTypeId = rateType.Id, UserId = user.Id });
             }
+
+            await _context.UserInvoiceSettings.AddAsync(new UserInvoiceSettings { UserId = user.Id });
 
             await _context.SaveChangesAsync();
 
@@ -173,6 +175,18 @@ namespace InvoiceGeneratorAPI.Controllers
                 Username = user.UserName,
                 Password = model.Password
             };
+
+            var currentRateTypes = await _context.RateTypes.ToListAsync();
+
+            foreach (var rateType in currentRateTypes)
+            {
+                await _context.UserRateAmount.AddAsync(new UserRateAmount
+                    { Id = 0, RateAmount = 0, RateTypeId = rateType.Id, UserId = user.Id });
+            }
+
+            await _context.UserInvoiceSettings.AddAsync(new UserInvoiceSettings { UserId = user.Id });
+
+            await _context.SaveChangesAsync();
 
             return await Login(loginModel);
         }

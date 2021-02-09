@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { InvoiceData } from './invoice-data.model';
 import { Invoice } from './invoice.model';
 
 @Injectable()
@@ -41,6 +42,19 @@ export class InvoiceService {
             timesheetId: invoice.timesheetId,
             invoiceForMonth: invoice.invoiceForMonth,
             invoiceForYear: invoice.invoiceForYear
+        };
+
+        return output;
+    }
+
+    parseResponseInvoiceDataToInvoiceObject(invoiceData: InvoiceData): Invoice {
+        const output: Invoice = {
+            id: +invoiceData.id,
+            invoiceNumber: invoiceData.invoiceNumber,
+            generatedDate: new Date(invoiceData.issuedDate),
+            timesheetId: +invoiceData.timesheetId,
+            invoiceForMonth: invoiceData.invoiceForMonth,
+            invoiceForYear: invoiceData.invoiceForYear
         };
 
         return output;

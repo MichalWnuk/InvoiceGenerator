@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using InvoiceGeneratorAPI.DTO;
 
 namespace InvoiceGeneratorAPI.Models
@@ -15,42 +16,40 @@ namespace InvoiceGeneratorAPI.Models
         public virtual ApplicationUser User { get; set; }
 
         [Required]
-        public string SellerName { get; set; }
+        public string SellerName { get; set; } = string.Empty;
 
         [Required]
-        public string SellerAddressLine1 { get; set; }
+        public string SellerAddressLine1 { get; set; } = string.Empty;
 
         [Required]
-        public string SellerAddressLine2 { get; set; }
+        public string SellerAddressLine2 { get; set; } = string.Empty;
 
         [Required]
-        public string SellerTaxId { get; set; }
+        public string SellerTaxId { get; set; } = string.Empty;
 
-        public string SellerEmail { get; set; }
-
-        [Required]
-        public string SellerBankName { get; set; }
+        public string SellerEmail { get; set; } = string.Empty;
 
         [Required]
-        public string SellerAccountNumber { get; set; }
+        public string SellerBankName { get; set; } = string.Empty;
 
         [Required]
-        public string BuyerName { get; set; }
+        public string SellerAccountNumber { get; set; } = string.Empty;
 
         [Required]
-        public string BuyerAddressLine1 { get; set; }
+        public string BuyerName { get; set; } = string.Empty;
 
         [Required]
-        public string BuyerAddressLine2 { get; set; }
-
-        public string BuyerPhone { get; set; }
+        public string BuyerAddressLine1 { get; set; } = string.Empty;
 
         [Required]
-        public string BuyerTaxId { get; set; }
+        public string BuyerAddressLine2 { get; set; } = string.Empty;
+
+        public string BuyerPhone { get; set; } = string.Empty;
 
         [Required]
-        public string IssuedBy { get; set; }
+        public string BuyerTaxId { get; set; } = string.Empty;
 
+        [Required] public string IssuedBy { get; set; } = string.Empty;
 
         public void UpdatePropertiesFromDto(InvoiceSettingsDTO dto)
         {

@@ -31,7 +31,7 @@ namespace InvoiceGeneratorAPI.Controllers
         {
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
 
-            var invoiceSettings =  await _context.UserInvoiceSettings.Where(settings => settings.UserId.Equals(currentUser.Id)).FirstAsync();
+            var invoiceSettings =  await _context.UserInvoiceSettings.Where(settings => settings.UserId.Equals(currentUser.Id)).FirstOrDefaultAsync();
 
             var dtos = ModelToDto.InvoiceSettingsToDTO(invoiceSettings);
 

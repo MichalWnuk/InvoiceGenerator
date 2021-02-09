@@ -6,6 +6,8 @@ import { Subscription } from 'rxjs';
 import { DataStorageService } from 'src/app/shared/data-storage.service';
 import { Timesheet } from 'src/app/timesheets/timesheet.model';
 import { Invoice } from '../invoice.model';
+import { InvoiceData } from '../invoice-data.model';
+import { InvoiceItem } from '../invoice-item.model';
 
 @Component({
   selector: 'app-invoice-add',
@@ -22,8 +24,15 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
   error: string = null;
   constructor(private dataStorageService: DataStorageService) { }
 
+  gettimesheetDropdownDisplay(timesheet: Timesheet): string {
+    const timesheetMonth = timesheet.date.getMonth() + 1;
+    const timesheetYear = timesheet.date.getFullYear();
+
+    return `${timesheetYear}-${timesheetMonth}`;
+  }
+
   ngOnInit(): void {
-    this.timesheetsSub = this.dataStorageService.fetchUserTimesheets().subscribe(timesheets => {
+    this.timesheetsSub = this.dataStorageService.fetchUserClosedTimesheets().subscribe(timesheets => {
       this.timesheets = timesheets;
     });
   }
@@ -45,32 +54,30 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
     const invoice: Invoice = new Invoice();
     invoice.id = 0;
     invoice.timesheetId = this.invoiceForm.value.timesheet;
-    this.generateInvoice();
-    // this.invoiceSub = this.dataStorageService.createInvoice(invoice).subscribe(data => {
-    //   const doc = new jsPDF();
-    //   doc.text('Miejsce wystawienia: {Wrocław}', 10, 10, { align: 'right' });
-    //   const arrayBuffer: ArrayBuffer = doc.output('arraybuffer');
-    //   this.timesheetsBlobSub = this.dataStorageService.updateInvoiceBlob(arrayBuffer, data.id).subscribe(blobResponse => {
-    //     this.invoiceForm.reset();
-    //     this.closeEvent.emit();
-    //   });
-    // }, errorMessage => {
-    //   this.invoiceForm.reset();
-    //   this.error = errorMessage;
-    // });
+    this.invoiceSub = this.dataStorageService.createInvoice(invoice).subscribe(data => {
+      const doc = this.generateInvoice(data);
+      const arrayBuffer: ArrayBuffer = doc.output('arraybuffer');
+      this.timesheetsBlobSub = this.dataStorageService.updateInvoiceBlob(arrayBuffer, +data.id).subscribe(blobResponse => {
+        this.invoiceForm.reset();
+        this.closeEvent.emit();
+      });
+    }, errorMessage => {
+      this.invoiceForm.reset();
+      this.error = errorMessage;
+    });
   }
 
-  private generateInvoice(): void {
+  private generateInvoice(invoiceData: InvoiceData): jsPDF {
     const doc = new jsPDF();
     doc.setFont('helvetica');
     doc.setFontSize(11);
-    doc.text('Miejsce wystawienia: {Wroclaw}', 140, 10);
-    doc.text('Data wystawienia: {29.01.2021}', 140, 15);
+    doc.text(`Miejsce wystawienia: ${invoiceData.issuedPlace}`, 140, 10);
+    doc.text(`Data wystawienia: ${invoiceData.issuedDate}`, 140, 15);
     doc.setLineWidth(0.5);
     doc.line(20, 20, 180, 20);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(28);
-    doc.text('Faktura nr: {1/01/2021}', 20, 30);
+    doc.text(`Faktura nr: ${invoiceData.invoiceNumber}`, 20, 30);
     doc.line(20, 34, 180, 34);
     doc.setFontSize(14);
     doc.text('Sprzedawca', 20, 45);
@@ -78,23 +85,23 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
     doc.line(20, 47, 180, 47);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.text('{Michal Wnuk Software Development}', 20, 52);
+    doc.text(`${invoiceData.invoiceSettings.sellerName}`, 20, 52);
     doc.line(110, 47, 110, 83);
-    doc.text('{ITFS Sp. z o.o.}', 112, 52);
-    doc.text('{ul. Sw. Anny 4}', 20, 56);
-    doc.text('{ul. Pawla Gdanca 6B/2}', 112, 56);
-    doc.text('{34-240 Jordanow}', 20, 60);
-    doc.text('{80-336 Gdansk}', 112, 60);
-    doc.text('{NIP: 5521722170}', 20, 64);
-    doc.text('{Tel: 533 332 494}', 112, 64);
-    doc.text('{Email: michal.wnuk.software@gmail.com}', 20, 68);
-    doc.text('{NIP: 5842726852}', 112, 68);
-    doc.text('{Bank: ING Bank Slaski}', 20, 72);
-    doc.text('{Nr konta: 24 1050 1575 1000 0092 5472 5469}', 20, 76);
+    doc.text(`${invoiceData.invoiceSettings.buyerName}`, 112, 52);
+    doc.text(`${invoiceData.invoiceSettings.sellerAddressLine1}`, 20, 56);
+    doc.text(`${invoiceData.invoiceSettings.buyerAddressLine1}`, 112, 56);
+    doc.text(`${invoiceData.invoiceSettings.sellerAddressLine2}`, 20, 60);
+    doc.text(`${invoiceData.invoiceSettings.buyerAddressLine2}`, 112, 60);
+    doc.text(`${invoiceData.invoiceSettings.sellerTaxId}`, 20, 64);
+    doc.text(`${invoiceData.invoiceSettings.buyerPhone}`, 112, 64);
+    doc.text(`${invoiceData.invoiceSettings.sellerEmail}`, 20, 68);
+    doc.text(`${invoiceData.invoiceSettings.buyerTaxId}`, 112, 68);
+    doc.text(`${invoiceData.invoiceSettings.sellerBankName}`, 20, 72);
+    doc.text(`${invoiceData.invoiceSettings.sellerAccountNumber}`, 20, 76);
     autoTable(
       doc, {
       head: this.createPositionHeaders(),
-      body: this.generatePositionData(),
+      body: this.generatePositionData(invoiceData.invoiceItems),
       startY: 86, theme: 'grid',
       headStyles: {
         fillColor: [218, 218, 218],
@@ -104,7 +111,7 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
     autoTable(
       doc, {
       head: this.createSummaryHeaders(),
-      body: this.generateSummaryData(),
+      body: this.generateSummaryData(invoiceData),
       startY: 200, theme: 'grid',
       headStyles: {
         fillColor: [218, 218, 218],
@@ -112,18 +119,19 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
       }
     });
     doc.text('Sposob zaplaty: przelew na konto', 20, 236);
-    doc.text('Data sprzedazy: {29.01.2021}', 20, 240);
-    doc.text('Termin platnosci: {28.02.2021}', 20, 244);
+    doc.text(`Data sprzedazy: ${invoiceData.sellDate}`, 20, 240);
+    doc.text(`Termin platnosci: ${invoiceData.payToDate}`, 20, 244);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Do zaplaty: {20004.72} zl', 20, 256);
+    doc.text(`Do zaplaty: ${invoiceData.summaryGrossAmount} zl`, 20, 256);
     doc.setFontSize(14);
-    doc.text('{Michal Wnuk}', 160, 266, { align: 'right' });
+    doc.text(`${invoiceData.issuedBy}`, 160, 266, { align: 'right' });
     doc.line(120, 270, 180, 270);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.text('Osoba upowazniona do wystawienia', 180, 276, { align: 'right' });
-    doc.save('aaaa.pdf');
+    doc.save('invoice.pdf');
+    return doc;
   }
 
   createPositionHeaders(): any[] {
@@ -142,21 +150,25 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
     return [headers];
   }
 
-  generatePositionData(): string[][] {
+  generatePositionData(items: InvoiceItem[]): string[][] {
     const result: string[][] = [];
-    const rows = [
-      '1',
-      'Usluga zgodnie z umowa z dnia 01.10.2020 za okres 01.01.2021 - 31.12.',
-      '152',
-      'godzina',
-      '107.00',
-      '16264.00',
-      '23%',
-      '3740.72',
-      '20004.72'
-    ];
+    let itemCount = 1;
+    items.forEach(item => {
+      const row = [
+        `${itemCount}`,
+        `${item.title}`,
+        `${item.count}`,
+        `${item.metric}`,
+        `${item.netPrice}`,
+        `${item.netAmount}`,
+        `${item.taxRate}`,
+        `${item.taxAmount}`,
+        `${item.grossAmount}`
+      ];
 
-    result.push(rows);
+      itemCount++;
+      result.push(row);
+    });
     return result;
   }
 
@@ -172,22 +184,22 @@ export class InvoiceAddComponent implements OnInit, OnDestroy {
     return [headers];
   }
 
-  generateSummaryData(): string[][] {
+  generateSummaryData(invoiceData: InvoiceData): string[][] {
     const result: string[][] = [];
     const row1 = [
       'W tym:',
-      '16264.00',
-      '23%',
-      '3740.72',
-      '20004.72'
+      `${invoiceData.summaryNetAmount}`,
+      `${invoiceData.taxRate}`,
+      `${invoiceData.summaryTaxAmount}`,
+      `${invoiceData.summaryGrossAmount}`
     ];
 
     const row2 = [
       'Razem:',
-      '16264.00',
+      `${invoiceData.summaryNetAmount}`,
       '',
-      '3740.72',
-      '20004.72'
+      `${invoiceData.summaryTaxAmount}`,
+      `${invoiceData.summaryGrossAmount}`
     ];
 
     result.push(row1);

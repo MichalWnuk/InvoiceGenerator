@@ -29,11 +29,20 @@ namespace InvoiceGeneratorAPI.Controllers
 
         // GET: api/Timesheets
         [HttpGet]
-        public async Task<IEnumerable<TimesheetDTO>> GetTimesheet()
+        public async Task<IEnumerable<TimesheetDTO>> GetTimesheet([FromQuery] string state)
         {
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
+            List<Timesheet> timesheets;
 
-            var timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id)).ToList();
+            if (!string.IsNullOrEmpty(state) && state.Equals(States.Closed))
+            {
+                timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id) && timesheet.State.Equals(States.Closed)).ToList();
+            }
+            else
+            {
+                timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id)).ToList();
+            }
+
 
             var dtos = ModelToDto.TimesheetsToDtos(timesheets);
             return dtos;
@@ -148,13 +157,20 @@ namespace InvoiceGeneratorAPI.Controllers
                 timesheet.UserId = user.Id;
             }
 
+            var isTimesheetForValidMonth = !_context.Timesheet.Any(t => t.Date.Year.Equals(timesheet.Date.Year) && t.Date.Month.Equals(timesheet.Date.Month));
+
+            if (!isTimesheetForValidMonth)
+            {
+                return BadRequest(new { Message = "Timesheet for selected month already exists!" });
+            }
+
             var timesheetObj = DtoToModel.DtoToTimesheet(timesheet);
 
             var validStates = States.GetStatesValues();
 
             if (!validStates.Contains(timesheet.State))
             {
-                return BadRequest();
+                return BadRequest("Provided status does not exist!");
             }
 
             await _context.Timesheet.AddAsync(timesheetObj);
