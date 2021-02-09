@@ -26,11 +26,11 @@
         <div class="row" *ngFor="let dayControl of controls; let i = index" [formGroupName]="i">
             <div class="col-xs-2">
                 <input type="date" class="form-control" formControlName="day" [min]="this.minDateForCurrentTimesheet"
-                    [max]="this.maxDateForCurrentTimesheet" [attr.disabled]="!isTimesheetEditable">
+                    [max]="this.maxDateForCurrentTimesheet" [attr.disabled]="isTimesheetEditable ? null : true">
             </div>
             <div class="col-xs-1">
                 <input type="number" class="form-control" formControlName="reportedHours" min="0" max="24"
-                    [attr.disabled]="!isTimesheetEditable">
+                    [attr.disabled]="isTimesheetEditable ? null : true">
             </div>
             <div class="col-xs-1">
                 <button type="button" class="btn btn-remove" (click)="onRemoveDay(i)"
@@ -41,9 +41,9 @@
 </form>
 <div *ngIf="!isRowLoaded">
     <div>
-        <p>
+        <h3>
             Timesheet for {{ this.currentMonthString }}
-        </p>
+        </h3>
     </div>
     <table class="table table-bordered table-hover">
         <thead>

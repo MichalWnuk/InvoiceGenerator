@@ -23,7 +23,8 @@
           Hello, {{ userName }}<span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-          <li><a style="cursor: pointer">Settings</a></li>
+          <li><a style="cursor: pointer" routerLink="/RateSettings">Rate Settings</a></li>
+          <li><a style="cursor: pointer" routerLink="/InvoiceSettings">Invoice Settings</a></li>
           <li><a style="cursor: pointer" (click)="onLogout()">Logout</a></li>
         </ul>
       </li>

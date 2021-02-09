@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthGuard } from '../auth/auth.guard';
+import { InvoiceResolver } from './invoice.resolver';
 import { InvoicesComponent } from './invoices.component';
 
 const routes: Routes = [
   {
-    path: '', component: InvoicesComponent, children: [
-    ]
+    path: '', component: InvoicesComponent, canActivate: [AuthGuard], resolve: [InvoiceResolver]
   }
 ];
 

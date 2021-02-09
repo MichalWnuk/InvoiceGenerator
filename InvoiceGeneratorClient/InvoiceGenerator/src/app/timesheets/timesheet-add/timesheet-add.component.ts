@@ -13,6 +13,7 @@ export class TimesheetAddComponent implements OnInit, OnDestroy {
   @Output() closeEvent = new EventEmitter();
   @ViewChild('timesheetForm', { static: false }) timesheetForm: NgForm;
   timesheetSub: Subscription;
+  error: string = null;
 
   constructor(private dataStorageService: DataStorageService) { }
 
@@ -24,6 +25,7 @@ export class TimesheetAddComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    this.error = null;
     const timesheet: Timesheet = new Timesheet();
     const timesheetDate: Date = new Date(this.timesheetForm.value.month);
     timesheetDate.setDate(2);
@@ -34,10 +36,14 @@ export class TimesheetAddComponent implements OnInit, OnDestroy {
     this.timesheetSub = this.dataStorageService.createTimesheet(timesheet).subscribe(data => {
       this.timesheetForm.reset();
       this.closeEvent.emit();
+    }, errorMessage => {
+      this.timesheetForm.reset();
+      this.error = errorMessage;
     });
   }
 
   onCancel(): void {
+    this.error = null;
     this.closeEvent.emit();
   }
 }

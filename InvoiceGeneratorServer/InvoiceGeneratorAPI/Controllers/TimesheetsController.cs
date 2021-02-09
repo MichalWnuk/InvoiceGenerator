@@ -29,16 +29,20 @@ namespace InvoiceGeneratorAPI.Controllers
 
         // GET: api/Timesheets
         [HttpGet]
-        public async Task<IEnumerable<TimesheetDTO>> GetTimesheet()
+        public async Task<IEnumerable<TimesheetDTO>> GetTimesheet([FromQuery] string state)
         {
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
+            List<Timesheet> timesheets;
 
-            var timesheets = new List<Timesheet>();
-
-            if (currentUser != null)
+            if (!string.IsNullOrEmpty(state) && state.Equals(States.Closed))
+            {
+                timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id) && timesheet.State.Equals(States.Closed)).ToList();
+            }
+            else
             {
                 timesheets = _context.Timesheet.Include(timesheet => timesheet.Rows).Where(timesheet => timesheet.UserId.Equals(currentUser.Id)).ToList();
             }
+
 
             var dtos = ModelToDto.TimesheetsToDtos(timesheets);
             return dtos;
@@ -80,7 +84,7 @@ namespace InvoiceGeneratorAPI.Controllers
 
             var currentUser = await _userManager.FindByNameAsync(User?.Identity?.Name);
 
-            var isCorrectUser = _context.Timesheet.Any(t => t.Id == id && t.UserId == currentUser.Id);
+            var isCorrectUser = _context.Timesheet.AsNoTracking().Any(t => t.Id == id && t.UserId == currentUser.Id);
 
             if (!isCorrectUser)
             {
@@ -96,7 +100,7 @@ namespace InvoiceGeneratorAPI.Controllers
                 return BadRequest();
             }
 
-            var isModificationAllowed = (await _context.Timesheet.FindAsync(id)).State != States.Closed;
+            var isModificationAllowed = _context.Timesheet.AsNoTracking().First(t => t.Id.Equals(id)).State != States.Closed;
 
             if (!isModificationAllowed)
             {
@@ -143,7 +147,6 @@ namespace InvoiceGeneratorAPI.Controllers
         }
 
         // POST: api/Timesheets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TimesheetDTO>> PostTimesheet(TimesheetDTO timesheet)
         {
@@ -154,13 +157,20 @@ namespace InvoiceGeneratorAPI.Controllers
                 timesheet.UserId = user.Id;
             }
 
+            var isTimesheetForValidMonth = !_context.Timesheet.Any(t => t.Date.Year.Equals(timesheet.Date.Year) && t.Date.Month.Equals(timesheet.Date.Month));
+
+            if (!isTimesheetForValidMonth)
+            {
+                return BadRequest(new { Message = "Timesheet for selected month already exists!" });
+            }
+
             var timesheetObj = DtoToModel.DtoToTimesheet(timesheet);
 
             var validStates = States.GetStatesValues();
 
             if (!validStates.Contains(timesheet.State))
             {
-                return BadRequest();
+                return BadRequest("Provided status does not exist!");
             }
 
             await _context.Timesheet.AddAsync(timesheetObj);
