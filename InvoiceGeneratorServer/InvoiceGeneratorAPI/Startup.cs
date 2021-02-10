@@ -25,7 +25,6 @@ namespace InvoiceGeneratorAPI
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
@@ -67,7 +66,7 @@ namespace InvoiceGeneratorAPI
             app.UseCors(builder =>
                 builder.WithOrigins("https://localhost:4200")
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
+                    .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
             );
 
             if (env.IsDevelopment())

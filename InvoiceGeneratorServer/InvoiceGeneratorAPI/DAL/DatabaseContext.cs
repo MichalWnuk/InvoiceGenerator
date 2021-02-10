@@ -11,8 +11,6 @@ namespace InvoiceGeneratorAPI.DAL
             
         }
 
-        public DbSet<RateType> RateTypes { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<RateType>().ToTable("RateTypes");
@@ -40,6 +38,7 @@ namespace InvoiceGeneratorAPI.DAL
 
         public DbSet<Timesheet> Timesheet { get; set; }
         public DbSet<Row> Row { get; set; }
+        public DbSet<RateType> RateTypes { get; set; }
         public DbSet<RateType> RateType { get; set; }
         public DbSet<UserRateAmount> UserRateAmount { get; set; }
         public DbSet<UserInvoiceSettings> UserInvoiceSettings { get; set; }
