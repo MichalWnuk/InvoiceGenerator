@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using InvoiceGeneratorAPI.DTO;
 using InvoiceGeneratorAPI.Models;
-using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceGeneratorAPI.Utils
 {
@@ -51,6 +50,32 @@ namespace InvoiceGeneratorAPI.Utils
             };
         }
 
+        public static InvoiceDataDTO InvoiceToDto(Invoice invoice, InvoiceSettingsDTO invoiceSettingsDTO, ICollection<RateType> rateTypes, ICollection<UserRateAmount> rateAmounts)
+        {
+            var timesheetDto = TimesheetToDto(invoice.Timesheet);
+            var summaryNetAmount = TimesheetDtoToSummaryNetAmount(timesheetDto, rateAmounts);
+
+            return new InvoiceDataDTO()
+            {
+                Id = invoice.Id.ToString(),
+                IssuedDate = invoice.GeneratedDate.ToShortDateString(),
+                IssuedPlace = "Wroclaw",
+                InvoiceNumber = invoice.InvoiceNumber,
+                InvoiceSettings = invoiceSettingsDTO,
+                InvoiceItems = TimesheetDtoToInvoiceItemDtos(timesheetDto, rateTypes, rateAmounts),
+                TimesheetId = timesheetDto.Id.ToString(),
+                InvoiceForMonth = invoice.Timesheet.Date.Month.ToString(),
+                InvoiceForYear = invoice.Timesheet.Date.Year.ToString(),
+                TaxRate = "23%",
+                SummaryNetAmount = summaryNetAmount.ToString(CultureInfo.InvariantCulture),
+                SummaryTaxAmount = Math.Round(summaryNetAmount * 0.23, 2).ToString(CultureInfo.InvariantCulture),
+                SummaryGrossAmount = Math.Round(summaryNetAmount * 1.23, 2).ToString(CultureInfo.InvariantCulture),
+                PayToDate = invoice.GeneratedDate.AddDays(30).ToShortDateString(),
+                SellDate = invoice.GeneratedDate.ToShortDateString(),
+                IssuedBy = invoiceSettingsDTO.IssuedBy
+            };
+        }
+
         private static RowDTO RowToDto(Row row)
         {
             ICollection<DayDTO> days = DaysCollectionToDto(row.Days);
@@ -76,32 +101,6 @@ namespace InvoiceGeneratorAPI.Utils
             var rateAmountDto = new UserRateAmountDTO { RateName = rateAmount.RateType.DisplayName, RateAmount = rateAmount.RateAmount };
 
             return rateAmountDto;
-        }
-
-        public static InvoiceDataDTO InvoiceToDto(Invoice invoice, InvoiceSettingsDTO invoiceSettingsDTO, ICollection<RateType> rateTypes, ICollection<UserRateAmount> rateAmounts)
-        {
-            var timesheetDto = TimesheetToDto(invoice.Timesheet);
-            var summaryNetAmount = TimesheetDtoToSummaryNetAmount(timesheetDto, rateAmounts);
-
-            return new InvoiceDataDTO()
-            {
-                Id = invoice.Id.ToString(),
-                IssuedDate = invoice.GeneratedDate.ToShortDateString(),
-                IssuedPlace = "Wroclaw",
-                InvoiceNumber = invoice.InvoiceNumber,
-                InvoiceSettings = invoiceSettingsDTO,
-                InvoiceItems = TimesheetDtoToInvoiceItemDtos(timesheetDto, rateTypes, rateAmounts),
-                TimesheetId = timesheetDto.Id.ToString(),
-                InvoiceForMonth = invoice.Timesheet.Date.Month.ToString(),
-                InvoiceForYear = invoice.Timesheet.Date.Year.ToString(),
-                TaxRate = "23%",
-                SummaryNetAmount = summaryNetAmount.ToString(CultureInfo.InvariantCulture),
-                SummaryTaxAmount = Math.Round(summaryNetAmount * 0.23, 2).ToString(CultureInfo.InvariantCulture),
-                SummaryGrossAmount = Math.Round(summaryNetAmount * 1.23, 2).ToString(CultureInfo.InvariantCulture),
-                PayToDate = invoice.GeneratedDate.AddDays(30).ToShortDateString(),
-                SellDate = invoice.GeneratedDate.ToShortDateString(),
-                IssuedBy = invoiceSettingsDTO.IssuedBy
-            };
         }
 
         private static ICollection<InvoiceItemDTO> TimesheetDtoToInvoiceItemDtos(TimesheetDTO dto, ICollection<RateType> rateTypes, ICollection<UserRateAmount> rateAmounts)

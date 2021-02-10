@@ -9,7 +9,6 @@ using InvoiceGeneratorAPI.DTO;
 using InvoiceGeneratorAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using System;
 using InvoiceGeneratorAPI.Utils;
 
 namespace InvoiceGeneratorAPI.Controllers
@@ -66,7 +65,6 @@ namespace InvoiceGeneratorAPI.Controllers
 
             var invoice = await _context.Invoice.FindAsync(id);
             var bytes = invoice.FileArray;
-            var invoiceArray = System.Text.Encoding.UTF8.GetString(invoice.FileArray);
 
             var dataStream = new MemoryStream(bytes);
 
