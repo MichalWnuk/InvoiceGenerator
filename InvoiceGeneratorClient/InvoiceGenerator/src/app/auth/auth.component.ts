@@ -54,11 +54,9 @@ export class AuthComponent implements OnInit {
     authObs = this.authService.sendAuthForm(this.isLoginMode, form.value);
 
     authObs.subscribe(response => {
-      console.log(response);
       this.isLoading = false;
       this.router.navigate(['/']);
     }, errorMessage => {
-      console.log(errorMessage);
       this.error = errorMessage;
       this.isLoading = false;
       this.showErrorAlert(errorMessage);

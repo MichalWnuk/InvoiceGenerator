@@ -99,7 +99,7 @@ namespace InvoiceGeneratorTests.Utils
         }
 
         [TestMethod]
-        public void TimesheetsToDTOs_WhenPassedEmpyArgument_Should_ReturnEmptyDTOCollection()
+        public void TimesheetsToDTOs_WhenPassedEmptyArgument_Should_ReturnEmptyDTOCollection()
         {
             var sut = ModelToDto.TimesheetsToDtos(new List<Timesheet>());
 

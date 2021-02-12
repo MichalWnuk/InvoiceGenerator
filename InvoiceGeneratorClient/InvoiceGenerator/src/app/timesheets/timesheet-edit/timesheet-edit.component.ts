@@ -119,7 +119,6 @@ export class TimesheetEditComponent implements OnInit, OnDestroy {
       this.finishedSaving = true;
     });
     this.timesheetService.updateTimesheet(this.currentTimesheet);
-    console.log(this.rowForm.value);
   }
 
   onAddRow(): void {
