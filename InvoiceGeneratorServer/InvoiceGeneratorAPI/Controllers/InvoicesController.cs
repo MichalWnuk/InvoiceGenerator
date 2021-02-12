@@ -117,9 +117,10 @@ namespace InvoiceGeneratorAPI.Controllers
             return dto;
         }
 
-        // PATCH: api/Invoices/5
+        // PATCH: api/Invoices
         [HttpPatch]
-        public async Task<IActionResult> PatchInvoice(int id)
+        [Consumes("application/pdf")]
+        public async Task<IActionResult> PatchInvoice([FromQuery] int id)
         {
             var user = await _userManager.FindByNameAsync(User?.Identity?.Name);
 

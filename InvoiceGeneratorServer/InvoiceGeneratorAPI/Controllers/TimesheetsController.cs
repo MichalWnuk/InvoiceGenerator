@@ -157,7 +157,7 @@ namespace InvoiceGeneratorAPI.Controllers
                 timesheet.UserId = user.Id;
             }
 
-            var isTimesheetForValidMonth = !_context.Timesheet.Any(t => t.Date.Year.Equals(timesheet.Date.Year) && t.Date.Month.Equals(timesheet.Date.Month));
+            var isTimesheetForValidMonth = !_context.Timesheet.Any(t => t.Date.Year.Equals(timesheet.Date.Year) && t.Date.Month.Equals(timesheet.Date.Month) && t.UserId.Equals(user.Id));
 
             if (!isTimesheetForValidMonth)
             {

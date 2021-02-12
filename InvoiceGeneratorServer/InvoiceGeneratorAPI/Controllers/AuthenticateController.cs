@@ -35,7 +35,7 @@ namespace InvoiceGeneratorAPI.Controllers
         }
 
         // POST: api/Login
-        [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Client)]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Client)]
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginModel model)

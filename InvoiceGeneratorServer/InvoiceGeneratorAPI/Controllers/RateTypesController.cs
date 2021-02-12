@@ -19,7 +19,7 @@ namespace InvoiceGeneratorAPI.Controllers
         }
 
         // GET: api/RateTypes
-        [ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RateType>>> GetRateTypes()
         {

@@ -12,7 +12,7 @@ namespace InvoiceGeneratorAPI.Controllers
     {
         // GET: api/TimesheetStates
         [HttpGet]
-        public IEnumerable<string> GetTimesheet()
+        public IEnumerable<string> GetTimesheetState()
         {
             var states = States.GetStatesValues();
 
